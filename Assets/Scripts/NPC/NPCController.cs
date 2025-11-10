@@ -2,7 +2,6 @@
 using UnityEngine.AI;
 using System.Collections;
 
-[RequireComponent(typeof(NavMeshAgent))]
 public class NPCController : MonoBehaviour
 {
     [Header("Target Settings")]

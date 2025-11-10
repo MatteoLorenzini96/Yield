@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(Renderer))]
 public class NPCFullnessController : MonoBehaviour
 {
     [Header("References")]
