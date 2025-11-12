@@ -354,7 +354,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 252421503}
-  - component: {fileID: 252421500}
+  - component: {fileID: 252421507}
   - component: {fileID: 252421504}
   - component: {fileID: 252421506}
   - component: {fileID: 252421502}
@@ -367,23 +367,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &252421500
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 252421499}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5bbf3d5c36e66043aee440841cc1130, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _player: {fileID: 1657323955}
-  _stopDistance: 2
-  _wanderRadius: 5
-  _wanderDelay: 3
-  _safeDistance: 6
 --- !u!54 &252421501
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -502,8 +485,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerFullness: {fileID: 1657323959}
-  _npcController: {fileID: 252421500}
+  _npcController: {fileID: 252421507}
   _detectionTrigger: {fileID: 1026727892}
+--- !u!114 &252421507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 252421499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afb003ceef3206d488ac44fad55b87b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _player: {fileID: 1657323955}
+  wanderSpeed: 1.5
+  approachSpeed: 4
+  blockSpeed: 2
+  runAwaySpeed: 5
+  stopDistance: 2
+  wanderRadius: 5
+  wanderDelay: 3
+  safeDistance: 6
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -655,7 +659,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _target: {fileID: 1657323955}
-  _offset: {x: 0, y: 3, z: -6}
+  _offset: {x: 0, y: 10, z: -6}
   _rotationSpeed: 5
   _smoothSpeed: 10
   _minYAngle: -35
@@ -1351,7 +1355,7 @@ MonoBehaviour:
   _onFullnessBelow20:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 252421500}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: NPCController, Assembly-CSharp
         m_MethodName: RunAway
         m_Mode: 1

@@ -2,11 +2,11 @@
 using UnityEngine.AI;
 using System.Collections;
 
-public class NPCController : MonoBehaviour
+[RequireComponent(typeof(NavMeshAgent))]
+public class NPCControllerProximity : MonoBehaviour
 {
     [Header("Target Settings")]
     [SerializeField] private Transform _player;
-    [SerializeField] private FullnessController _playerFullness;
 
     [Header("Movement Speeds")]
     [SerializeField] private float wanderSpeed = 1.5f;
@@ -15,45 +15,36 @@ public class NPCController : MonoBehaviour
     [SerializeField] private float runAwaySpeed = 5f;
 
     [Header("Movement Settings")]
-    [SerializeField] private float _stopDistance = 2f;
-    [SerializeField] private float _wanderRadius = 5f;
-    [SerializeField] private float _wanderDelay = 3f;
+    [SerializeField] private float stopDistance = 2f;
+    [SerializeField] private float wanderRadius = 5f;
+    [SerializeField] private float wanderDelay = 3f;
 
     [Header("RunAway Settings")]
-    [SerializeField] private float _safeDistance = 6f;
+    [SerializeField] private float safeDistance = 6f;
 
     private NavMeshAgent _agent;
     private Coroutine _activeRoutine;
     private bool _isRunningAway;
 
-    private void Awake()
-    {
-        _agent = GetComponent<NavMeshAgent>();
-
-        if (_playerFullness == null && _player != null)
-            _playerFullness = _player.GetComponent<FullnessController>();
-    }
+    private void Awake() => _agent = GetComponent<NavMeshAgent>();
 
     public void StopMovement()
     {
-        if (_activeRoutine != null)
-            StopCoroutine(_activeRoutine);
-
+        if (_activeRoutine != null) StopCoroutine(_activeRoutine);
         _activeRoutine = null;
         _agent.isStopped = true;
     }
 
     public void WanderSlow() => RestartRoutine(WanderRoutine());
-
     public void ApproachPlayer() => RestartRoutine(ApproachRoutine());
-
     public void BlockPlayer() => RestartRoutine(BlockRoutine());
-
     public void RunAway()
     {
-        // Controllo full del player
-        if (_playerFullness == null || _playerFullness.CurrentFullness != -1f)
-            return;
+        if (_player == null) return;
+
+        // RunAway SOLO se full del player == -1
+        var playerFullness = _player.GetComponent<FullnessController>();
+        if (playerFullness == null || playerFullness.CurrentFullness != -1f) return;
 
         RestartRoutine(RunAwayRoutine());
     }
@@ -63,15 +54,14 @@ public class NPCController : MonoBehaviour
     {
         while (true)
         {
-            Vector3 randomDir = Random.insideUnitSphere * _wanderRadius;
-            randomDir += transform.position;
-            if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, _wanderRadius, NavMesh.AllAreas))
+            Vector3 randomDir = Random.insideUnitSphere * wanderRadius + transform.position;
+            if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, wanderRadius, NavMesh.AllAreas))
             {
                 _agent.isStopped = false;
                 _agent.speed = wanderSpeed;
                 _agent.SetDestination(hit.position);
             }
-            yield return new WaitForSeconds(_wanderDelay);
+            yield return new WaitForSeconds(wanderDelay);
         }
     }
 
@@ -81,13 +71,9 @@ public class NPCController : MonoBehaviour
         while (true)
         {
             if (!_player) yield break;
-
-            float distance = Vector3.Distance(transform.position, _player.position);
-            _agent.isStopped = distance <= _stopDistance;
-
-            if (!_agent.isStopped)
-                _agent.SetDestination(_player.position);
-
+            float dist = Vector3.Distance(transform.position, _player.position);
+            _agent.isStopped = dist <= stopDistance;
+            if (!_agent.isStopped) _agent.SetDestination(_player.position);
             yield return null;
         }
     }
@@ -98,13 +84,9 @@ public class NPCController : MonoBehaviour
         while (true)
         {
             if (!_player) yield break;
-
-            float distance = Vector3.Distance(transform.position, _player.position);
-            _agent.isStopped = distance <= _stopDistance;
-
-            if (!_agent.isStopped)
-                _agent.SetDestination(_player.position);
-
+            float dist = Vector3.Distance(transform.position, _player.position);
+            _agent.isStopped = dist <= stopDistance;
+            if (!_agent.isStopped) _agent.SetDestination(_player.position);
             yield return null;
         }
     }
@@ -113,37 +95,29 @@ public class NPCController : MonoBehaviour
     {
         _isRunningAway = true;
         _agent.speed = runAwaySpeed;
-
         while (_isRunningAway && _player)
         {
             Vector3 fromPlayer = transform.position - _player.position;
             fromPlayer.y = 0f;
-
-            if (fromPlayer.magnitude < _safeDistance)
+            if (fromPlayer.magnitude < safeDistance)
             {
-                Vector3 targetPos = transform.position + fromPlayer.normalized * _safeDistance;
-                if (NavMesh.SamplePosition(targetPos, out NavMeshHit hit, _safeDistance, NavMesh.AllAreas))
+                Vector3 targetPos = transform.position + fromPlayer.normalized * safeDistance;
+                if (NavMesh.SamplePosition(targetPos, out NavMeshHit hit, safeDistance, NavMesh.AllAreas))
                 {
                     _agent.isStopped = false;
                     _agent.SetDestination(hit.position);
                 }
             }
-            else
-            {
-                _agent.isStopped = true;
-            }
+            else _agent.isStopped = true;
 
             yield return null;
         }
-
         _isRunningAway = false;
     }
 
     private void RestartRoutine(IEnumerator routine)
     {
-        if (_activeRoutine != null)
-            StopCoroutine(_activeRoutine);
-
+        if (_activeRoutine != null) StopCoroutine(_activeRoutine);
         _activeRoutine = StartCoroutine(routine);
     }
 }
