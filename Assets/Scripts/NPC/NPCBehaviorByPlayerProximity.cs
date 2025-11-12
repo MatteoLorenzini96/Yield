@@ -6,28 +6,45 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
     [Header("References")]
     [SerializeField] private FullnessController _playerFullness;
     [SerializeField] private NPCControllerProximity _npcController;
-    [SerializeField] private SphereCollider _detectionTrigger;
+    [SerializeField] private SphereCollider _detectionTrigger; // trigger per rilevare il player
 
     private int _currentState = -1;
-    private bool _playerInRange = false;
 
     private void Awake()
     {
-        if (!_npcController) _npcController = GetComponent<NPCControllerProximity>();
+        if (_npcController == null)
+            _npcController = GetComponent<NPCControllerProximity>();
+
         if (_detectionTrigger == null)
         {
-            Debug.LogError($"{name}: Devi assegnare un SphereCollider trigger!");
+            Debug.LogError($"{name}: Devi assegnare un SphereCollider per il trigger!");
             enabled = false;
             return;
         }
-        if (!_detectionTrigger.isTrigger) _detectionTrigger.isTrigger = true;
+
+        if (!_detectionTrigger.isTrigger)
+            _detectionTrigger.isTrigger = true; // assicurati sia trigger
+
+        if (_playerFullness == null)
+        {
+            _playerFullness = FindFirstObjectByType<FullnessController>();
+            if (_playerFullness == null)
+                Debug.LogError("Player FullnessController non trovato!");
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (_playerFullness != null && other.transform == _playerFullness.transform)
         {
-            _playerInRange = true;
+            EvaluatePlayerFullness();
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (_playerFullness != null && other.transform == _playerFullness.transform)
+        {
             EvaluatePlayerFullness();
         }
     }
@@ -36,15 +53,9 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
     {
         if (_playerFullness != null && other.transform == _playerFullness.transform)
         {
-            _playerInRange = false;
             _currentState = 0;
             _npcController.StopMovement();
         }
-    }
-
-    private void Update()
-    {
-        if (_playerInRange) EvaluatePlayerFullness();
     }
 
     private void EvaluatePlayerFullness()
@@ -52,33 +63,27 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
         if (_playerFullness == null) return;
 
         float percent = Mathf.InverseLerp(-1f, 1f, _playerFullness.CurrentFullness) * 100f;
+        // Debug: percentuale di full del player
         Debug.Log($"[NPCBehavior] Player Fullness: {percent:F1}%");
 
-        int newState;
+        int newState = _currentState;
 
-        if (percent >= 75f && percent <= 100f)
-        {
-            newState = 1; // cammina lentamente intorno al punto di spawn
-        }
-        else if (percent >= 25f && percent <= 74f)
-        {
-            newState = 2; // corre verso il player
-        }
-        else if (percent >= 1f && percent <= 24f)
-        {
-            newState = 3; // blocca il player
-        }
-        else if (_playerFullness.CurrentFullness == -1f)
-        {
-            newState = 4; // scappa
-        }
-        else
-        {
-            // se non rientra in nessun range, resta nello stato precedente
-            newState = _currentState;
-        }
+        if (percent >= 75f)
+            newState = 1;   // Wander lentamente
+        else if (percent >= 25f)
+            newState = 2;   // Corre verso il player
+        else if (percent >= 1f)
+            newState = 3;   // Blocca il player
+        else if (percent == -1f)
+            newState = 4;   // RunAway
+
+        // Controlla anche la fullness dell'NPC
+        var npcFullness = _npcController.GetComponent<NPCFullnessController>();
+        if (npcFullness != null && npcFullness.CurrentFullness >= 1f)
+            newState = 4;   // RunAway se NPC full
 
         if (newState == _currentState) return;
+
         _currentState = newState;
         HandleBehavior(newState);
     }
@@ -87,10 +92,18 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
     {
         switch (state)
         {
-            case 1: _npcController.WanderSlow(); break;
-            case 2: _npcController.ApproachPlayer(); break;
-            case 3: _npcController.BlockPlayer(); break;
-            case 4: _npcController.RunAway(); break;
+            case 1:
+                _npcController.WanderSlow();
+                break;
+            case 2:
+                _npcController.ApproachPlayer();
+                break;
+            case 3:
+                _npcController.BlockPlayer();
+                break;
+            case 4:
+                _npcController.RunAway();
+                break;
         }
     }
 }
