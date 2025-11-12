@@ -6,14 +6,17 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
     [Header("References")]
     [SerializeField] private FullnessController _playerFullness;
     [SerializeField] private NPCControllerProximity _npcController;
-    [SerializeField] private SphereCollider _detectionTrigger; // trigger per rilevare il player
+    [SerializeField] private SphereCollider _detectionTrigger;
 
+    private NPCFullnessController _npcFullness;
     private int _currentState = -1;
 
     private void Awake()
     {
         if (_npcController == null)
             _npcController = GetComponent<NPCControllerProximity>();
+
+        _npcFullness = GetComponent<NPCFullnessController>();
 
         if (_detectionTrigger == null)
         {
@@ -23,7 +26,7 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
         }
 
         if (!_detectionTrigger.isTrigger)
-            _detectionTrigger.isTrigger = true; // assicurati sia trigger
+            _detectionTrigger.isTrigger = true;
 
         if (_playerFullness == null)
         {
@@ -37,7 +40,7 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
     {
         if (_playerFullness != null && other.transform == _playerFullness.transform)
         {
-            EvaluatePlayerFullness();
+            EvaluateBehavior();
         }
     }
 
@@ -45,7 +48,7 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
     {
         if (_playerFullness != null && other.transform == _playerFullness.transform)
         {
-            EvaluatePlayerFullness();
+            EvaluateBehavior();
         }
     }
 
@@ -58,13 +61,24 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
         }
     }
 
-    private void EvaluatePlayerFullness()
+    private void EvaluateBehavior()
     {
-        if (_playerFullness == null) return;
+        if (_playerFullness == null || _npcFullness == null) return;
 
+        // 🔹 SE L'NPC È FULL, SCAPPA SUBITO
+        if (_npcFullness.CurrentFullness >= 1f)
+        {
+            if (_currentState != 4)
+            {
+                _currentState = 4;
+                _npcController.RunAway();
+                Debug.Log($"[{name}] NPC è pieno → scappa!");
+            }
+            return; // interrompi qui, non serve altro
+        }
+
+        // 🔹 Altrimenti valuta la fullness del player
         float percent = Mathf.InverseLerp(-1f, 1f, _playerFullness.CurrentFullness) * 100f;
-        // Debug: percentuale di full del player
-        Debug.Log($"[NPCBehavior] Player Fullness: {percent:F1}%");
 
         int newState = _currentState;
 
@@ -75,12 +89,7 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
         else if (percent >= 1f)
             newState = 3;   // Blocca il player
         else if (percent == -1f)
-            newState = 4;   // RunAway
-
-        // Controlla anche la fullness dell'NPC
-        var npcFullness = _npcController.GetComponent<NPCFullnessController>();
-        if (npcFullness != null && npcFullness.CurrentFullness >= 1f)
-            newState = 4;   // RunAway se NPC full
+            newState = 4;   // RunAway (player scarico)
 
         if (newState == _currentState) return;
 
