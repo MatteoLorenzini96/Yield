@@ -11,23 +11,19 @@ public class EnergyTransfer : MonoBehaviour
     [SerializeField] private string npcTag = "NPC";
 
     [Header("Transfer Settings")]
-    [Tooltip("Quanto il player può dare per ogni trasferimento.")]
     [SerializeField] private float transferAmount = 0.1f;
-    [Tooltip("Moltiplicatore di quanto riceve l'NPC.")]
     [SerializeField] private float npcMultiplier = 5f;
-    [Tooltip("Percentuale che ritorna al player dopo il trasferimento.")]
     [SerializeField] private float playerReturnFraction = 0.05f;
-    [Tooltip("Durata dell'animazione di trasferimento (lerp).")]
     [SerializeField] private float transferDuration = 1f;
 
     [Header("Input Event")]
-    [Tooltip("Evento richiamato quando viene premuto il click sinistro del mouse.")]
     public UnityEvent OnLeftClick = new UnityEvent();
 
     private FullnessController _playerFullness;
     private readonly List<NPCFullnessController> _npcsInRange = new List<NPCFullnessController>();
     private NPCFullnessController _closestNPC;
     private bool _inTransfer = false;
+    private bool _giverDestroyed = false;
 
     private void Awake()
     {
@@ -39,7 +35,6 @@ public class EnergyTransfer : MonoBehaviour
             enabled = false;
             return;
         }
-
         detectionTrigger.isTrigger = true;
     }
 
@@ -59,22 +54,26 @@ public class EnergyTransfer : MonoBehaviour
             OnLeftClick?.Invoke();
     }
 
+    public void SubscribeToGiver(NPCControllerProximity giver)
+    {
+        giver.OnGiverDestroyed += HandleGiverDestroyed;
+    }
+
+    private void HandleGiverDestroyed()
+    {
+        _giverDestroyed = true;
+        Debug.Log("Giver distrutto: EnergyTransfer ora abilitato");
+    }
+
     private void HandleTransferRequest()
     {
+        if (!_giverDestroyed) return; // Ignora finché il Giver non è distrutto
         if (_inTransfer || _closestNPC == null) return;
 
-        // Calcola quanta energia può realmente trasferire senza scendere sotto -1
         float maxTransferable = _playerFullness.CurrentFullness - (-1f);
+        if (maxTransferable <= 0f) return;
 
-        if (maxTransferable <= 0f)
-        {
-            Debug.Log($"{name}: Energia insufficiente per il trasferimento!");
-            return;
-        }
-
-        // Trasferimento effettivo = minimo tra transferAmount e quanto resta sopra -1
         float actualTransfer = Mathf.Min(transferAmount, maxTransferable);
-
         StartCoroutine(TransferEnergyRoutine(_closestNPC, actualTransfer));
     }
 
@@ -141,12 +140,10 @@ public class EnergyTransfer : MonoBehaviour
             yield return null;
         }
 
-        // Restituzione al player
         float returnAmount = actualTransfer * npcMultiplier * playerReturnFraction;
         _playerFullness.SetFullness(Mathf.Clamp(_playerFullness.CurrentFullness + returnAmount, -1f, 1f));
 
         _inTransfer = false;
-
         UpdateClosestNPC();
     }
 }
