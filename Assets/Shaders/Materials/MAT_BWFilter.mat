@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-4727290169416969562
+--- !u!114 &-1167079483373363930
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_PlayerFill
-  m_Shader: {fileID: -6465566751694194690, guid: c63d5735cf0a2c34c8d39c67e8fc555b, type: 3}
+  m_Name: MAT_BWFilter
+  m_Shader: {fileID: -6465566751694194690, guid: 849b83fbed0db9d4696e707f8b697410, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -51,14 +51,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _FresnerPower: 1.76
-    - _Fullness: 1
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _WaveVelocity: 1
-    m_Colors:
-    - _Emission: {r: 2.220728, g: 2.6390157, b: 0, a: 1}
-    - _FresnerColor: {r: 0.09317321, g: 0.96447307, b: 0, a: 0}
-    - _WavePower: {r: 7.1, g: -1.06, b: 0, a: 0}
+    m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1

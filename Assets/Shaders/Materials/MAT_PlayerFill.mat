@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_NPCFill
+  m_Name: MAT_PlayerFill
   m_Shader: {fileID: -6465566751694194690, guid: c63d5735cf0a2c34c8d39c67e8fc555b, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -52,7 +52,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _FresnerPower: 1.76
-    - _Fullness: -1
+    - _Fullness: 1
     - _QueueControl: 0
     - _QueueOffset: 0
     - _WaveVelocity: 1
