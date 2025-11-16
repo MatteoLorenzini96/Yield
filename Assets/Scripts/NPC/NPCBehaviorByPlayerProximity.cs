@@ -57,12 +57,17 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
         if (_playerFullness != null && other.transform == _playerFullness.transform)
         {
             _currentState = 0;
-            _npcController.StopMovement();
+
+            if (!_npcController.IsGiver) // Ignora i Giver
+            {
+                _npcController.StopMovement();
+            }
         }
     }
 
     private void EvaluateBehavior()
     {
+        if (_npcController.IsGiver) return; // Ignora i Giver completamente
         if (_playerFullness == null || _npcFullness == null) return;
 
         // 🔹 SE L'NPC È FULL, SCAPPA SUBITO
@@ -102,15 +107,19 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
         switch (state)
         {
             case 1:
+                Debug.Log($"{name} sta facendo WanderSlow");
                 _npcController.WanderSlow();
                 break;
             case 2:
+                Debug.Log($"{name} sta facendo ApproachPlayer");
                 _npcController.ApproachPlayer();
                 break;
             case 3:
+                Debug.Log($"{name} sta facendo BlockPlayer");
                 _npcController.BlockPlayer();
                 break;
             case 4:
+                Debug.Log($"{name} sta facendo RunAway");
                 _npcController.RunAway();
                 break;
         }

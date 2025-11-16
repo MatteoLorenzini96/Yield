@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
+using System;
 using System.Collections;
 
 [RequireComponent(typeof(NavMeshAgent))]
@@ -7,7 +8,7 @@ public class NPCControllerProximity : MonoBehaviour
 {
     [Header("Target Settings")]
     [SerializeField] private Transform _player;
-    [SerializeField] private SphereCollider _detectionTrigger; // trigger di rilevamento player
+    [SerializeField] private SphereCollider _detectionTrigger;
 
     [Header("Movement Speeds")]
     [SerializeField] private float wanderSpeed = 1.5f;
@@ -23,18 +24,31 @@ public class NPCControllerProximity : MonoBehaviour
     [Header("RunAway Settings")]
     [SerializeField] private float safeDistance = 6f;
 
+    [Header("Giver Settings")]
+    [SerializeField] private bool isGiver = false;
+    [SerializeField] private float spawnWanderRadius = 2f;
+
+    private Vector3 _spawnPosition;
     private NavMeshAgent _agent;
     private Coroutine _activeRoutine;
     private bool _isRunningAway;
     private bool _playerInRange = false;
+    private bool _hasBeenInteracted = false;
 
     private NPCFullnessController _npcFullness;
     private FullnessController _playerFullness;
+
+    // Evento per notificare quando il Giver viene distrutto
+    public event Action OnGiverDestroyed;
+
+    public bool IsGiver => isGiver;
+    public bool HasBeenInteracted => _hasBeenInteracted;
 
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
         _npcFullness = GetComponent<NPCFullnessController>();
+        _spawnPosition = transform.position;
 
         if (_detectionTrigger == null)
         {
@@ -48,10 +62,40 @@ public class NPCControllerProximity : MonoBehaviour
             _playerFullness = _player.GetComponent<FullnessController>();
     }
 
+    private void OnEnable()
+    {
+        if (_player != null)
+        {
+            EnergyTransfer et = _player.GetComponent<EnergyTransfer>();
+            if (et != null)
+                et.OnLeftClick.AddListener(OnPlayerInteraction);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_player != null)
+        {
+            EnergyTransfer et = _player.GetComponent<EnergyTransfer>();
+            if (et != null)
+                et.OnLeftClick.RemoveListener(OnPlayerInteraction);
+        }
+    }
+
+    private void OnPlayerInteraction()
+    {
+        _hasBeenInteracted = true;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (_player == null) return;
         if (other.transform == _player) _playerInRange = true;
+
+        if (isGiver && other.transform == _player)
+        {
+            RestartRoutine(GiverRoutine());
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -60,7 +104,9 @@ public class NPCControllerProximity : MonoBehaviour
         if (other.transform == _player)
         {
             _playerInRange = false;
-            StopMovement();
+
+            if (!isGiver)
+                StopMovement();
         }
     }
 
@@ -69,31 +115,21 @@ public class NPCControllerProximity : MonoBehaviour
         if (_activeRoutine != null) StopCoroutine(_activeRoutine);
         _activeRoutine = null;
         _agent.isStopped = true;
+        Debug.Log($"{name} ha fermato il movimento");
     }
 
+    // ───────────── Metodi pubblici per NPCBehaviorByPlayerProximity ─────────────
     public void WanderSlow() => RestartRoutine(WanderRoutine());
     public void ApproachPlayer() => RestartRoutine(ApproachRoutine());
     public void BlockPlayer() => RestartRoutine(BlockRoutine());
+    public void RunAway() => RestartRoutine(RunAwayRoutine());
 
-    public void RunAway()
-    {
-        if (!_playerInRange) return; // attivo solo se player nel raggio
-
-        bool playerCondition = _playerFullness != null && _playerFullness.CurrentFullness == -1f;
-        bool npcCondition = _npcFullness != null && _npcFullness.CurrentFullness == 1f;
-
-        if (playerCondition || npcCondition)
-        {
-            RestartRoutine(RunAwayRoutine());
-        }
-    }
-
-    //───────────────────────────────
+    // ───────────── Coroutine ─────────────
     private IEnumerator WanderRoutine()
     {
-        while (_playerInRange)
+        while (_playerInRange || isGiver)
         {
-            Vector3 randomDir = Random.insideUnitSphere * wanderRadius + transform.position;
+            Vector3 randomDir = UnityEngine.Random.insideUnitSphere * wanderRadius + transform.position;
             if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, wanderRadius, NavMesh.AllAreas))
             {
                 _agent.isStopped = false;
@@ -136,8 +172,10 @@ public class NPCControllerProximity : MonoBehaviour
         _isRunningAway = true;
         _agent.speed = runAwaySpeed;
 
-        while (_isRunningAway && _playerInRange && _player != null)
+        while (_isRunningAway)
         {
+            if (_player == null) break;
+
             Vector3 fromPlayer = transform.position - _player.position;
             fromPlayer.y = 0f;
 
@@ -153,13 +191,73 @@ public class NPCControllerProximity : MonoBehaviour
             else
             {
                 _agent.isStopped = true;
+                _isRunningAway = false;
+
+                // Se è un Giver, distruggilo e chiama l'evento
+                if (isGiver)
+                {
+                    Debug.Log($"{name} è stato distrutto dopo aver raggiunto la safe distance");
+                    OnGiverDestroyed?.Invoke();
+                    Destroy(gameObject);
+                }
             }
 
             yield return null;
         }
 
-        _isRunningAway = false;
         _agent.isStopped = true;
+    }
+
+    private IEnumerator GiverRoutine()
+    {
+        Debug.Log($"{name} ha iniziato GiverRoutine");
+
+        // Muoviti intorno al spawn finché il player non entra
+        while (!_playerInRange)
+        {
+            Vector3 randomDir = UnityEngine.Random.insideUnitSphere * spawnWanderRadius + _spawnPosition;
+            if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, spawnWanderRadius, NavMesh.AllAreas))
+            {
+                _agent.isStopped = false;
+                _agent.speed = wanderSpeed;
+                _agent.SetDestination(hit.position);
+            }
+            yield return new WaitForSeconds(wanderDelay);
+        }
+
+        Debug.Log($"{name} si sta avvicinando al player");
+        _agent.speed = approachSpeed;
+        while (Vector3.Distance(transform.position, _player.position) > stopDistance)
+        {
+            _agent.isStopped = false;
+            _agent.SetDestination(_player.position);
+            yield return null;
+        }
+
+        // Lerpa la fulleness del player e svuota la propria
+        if (_playerFullness != null && _npcFullness != null)
+        {
+            float startPlayer = _playerFullness.CurrentFullness;
+            float startNPC = _npcFullness.CurrentFullness;
+            float duration = 3f; // più lento
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                _playerFullness.SetFullness(Mathf.Lerp(startPlayer, 1f, t));
+                _npcFullness.SetFullness(Mathf.Lerp(startNPC, -1f, t));
+                yield return null;
+            }
+
+            _playerFullness.SetFullness(1f);
+            _npcFullness.SetFullness(-1f);
+            Debug.Log($"{name} ha ricaricato il player e svuotato la propria fulleness");
+        }
+
+        Debug.Log($"{name} sta fuggendo");
+        yield return RunAwayRoutine();
     }
 
     private void RestartRoutine(IEnumerator routine)

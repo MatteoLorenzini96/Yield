@@ -491,6 +491,8 @@ MonoBehaviour:
   wanderRadius: 2
   wanderDelay: 2.5
   safeDistance: 6
+  isGiver: 0
+  spawnWanderRadius: 2
 --- !u!4 &243861609
 Transform:
   m_ObjectHideFlags: 0
@@ -525,12 +527,12 @@ GameObject:
   - component: {fileID: 252421501}
   - component: {fileID: 252421505}
   m_Layer: 0
-  m_Name: NPC
+  m_Name: NPCGiver
   m_TagString: NPC
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!54 &252421501
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -590,7 +592,7 @@ Transform:
   m_GameObject: {fileID: 252421499}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11, y: 0, z: 0}
+  m_LocalPosition: {x: -12.6, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -612,7 +614,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetRenderer: {fileID: 238852110}
-  _fullness: -1
+  _fullness: -0.91
   _transitionSpeed: 2
 --- !u!195 &252421505
 NavMeshAgent:
@@ -669,10 +671,12 @@ MonoBehaviour:
   approachSpeed: 4
   blockSpeed: 3
   runAwaySpeed: 5
-  stopDistance: 2
+  stopDistance: 1.5
   wanderRadius: 2
   wanderDelay: 2.5
-  safeDistance: 6
+  safeDistance: 30
+  isGiver: 1
+  spawnWanderRadius: 2
 --- !u!1 &252601490
 GameObject:
   m_ObjectHideFlags: 0
@@ -1456,6 +1460,8 @@ MonoBehaviour:
   wanderRadius: 2
   wanderDelay: 2.5
   safeDistance: 6
+  isGiver: 0
+  spawnWanderRadius: 2
 --- !u!4 &647965340
 Transform:
   m_ObjectHideFlags: 0
@@ -1790,6 +1796,8 @@ MonoBehaviour:
   wanderRadius: 2
   wanderDelay: 2.5
   safeDistance: 6
+  isGiver: 0
+  spawnWanderRadius: 2
 --- !u!4 &799789370
 Transform:
   m_ObjectHideFlags: 0
@@ -2323,6 +2331,8 @@ MonoBehaviour:
   wanderRadius: 2
   wanderDelay: 2.5
   safeDistance: 6
+  isGiver: 0
+  spawnWanderRadius: 2
 --- !u!4 &956515489
 Transform:
   m_ObjectHideFlags: 0
@@ -2912,7 +2922,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &1578187876
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3142,7 +3152,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _targetRenderer: {fileID: 597063602}
   _fullnessProperty: _Fullness
-  _fullness: 1
+  _fullness: -0.8
   _onFullness100to75:
     m_PersistentCalls:
       m_Calls: []
@@ -3409,6 +3419,8 @@ MonoBehaviour:
   wanderRadius: 2
   wanderDelay: 2.5
   safeDistance: 6
+  isGiver: 0
+  spawnWanderRadius: 2
 --- !u!4 &1691898329
 Transform:
   m_ObjectHideFlags: 0
@@ -3657,6 +3669,8 @@ MonoBehaviour:
   wanderRadius: 2
   wanderDelay: 2.5
   safeDistance: 6
+  isGiver: 0
+  spawnWanderRadius: 2
 --- !u!4 &1768966575
 Transform:
   m_ObjectHideFlags: 0
