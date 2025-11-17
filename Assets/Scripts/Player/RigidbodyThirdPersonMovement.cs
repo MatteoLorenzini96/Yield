@@ -11,8 +11,8 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
 
     [Header("Jump Settings")]
     [SerializeField] private float baseJumpForce = 5f;
-    [SerializeField] private float fallMultiplier = 2.5f;     // aumenta la gravità in caduta
-    [SerializeField] private float lowJumpMultiplier = 2f;    // aumenta la gravità se si rilascia presto il salto
+    [SerializeField] private float fallMultiplier = 2.5f;
+    [SerializeField] private float lowJumpMultiplier = 2f;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckDistance = 0.4f;
     [SerializeField] private LayerMask groundMask;
@@ -22,15 +22,21 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
     [SerializeField] private FullnessController fullnessController;
 
     private Rigidbody _rigidbody;
+    private Animator animator;
+
     private Vector3 _moveDirection;
     private float _currentSpeed;
     private bool _isGrounded;
-    private float _fullnessPercent; // da 0 (vuoto) a 1 (pieno)
+    private float _fullnessPercent;
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
         _rigidbody.freezeRotation = true;
+
+        animator = GetComponentInChildren<Animator>();
+        if (animator == null)
+            Debug.LogError("Manca l'Animator!");
 
         if (fullnessController == null)
             Debug.LogError("Assegna il FullnessController");
@@ -42,6 +48,7 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
         UpdateFullnessEffect();
         CheckGround();
         ApplyBetterJumpPhysics();
+        UpdateAnimator();     // <-- AGGIUNTO
     }
 
     private void FixedUpdate()
@@ -101,9 +108,6 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
         float distance = groundCheck != null ? groundCheckDistance : 0.6f;
 
         _isGrounded = Physics.Raycast(origin, Vector3.down, distance, groundMask);
-
-        // (DEBUG disattivato)
-        // Debug.DrawRay(origin, Vector3.down * distance, _isGrounded ? Color.green : Color.red);
     }
 
     private void TryJump()
@@ -118,23 +122,20 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
             return;
 
         float jumpForce = baseJumpForce * Mathf.Lerp(0.4f, 1f, _fullnessPercent);
-        _rigidbody.linearVelocity = new Vector3(_rigidbody.linearVelocity.x, 0f, _rigidbody.linearVelocity.z); // reset verticale
+        _rigidbody.linearVelocity = new Vector3(_rigidbody.linearVelocity.x, 0f, _rigidbody.linearVelocity.z);
         _rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
     private void ApplyBetterJumpPhysics()
     {
-        // Solo se non è a terra
         if (!_isGrounded)
         {
             if (_rigidbody.linearVelocity.y < 0)
             {
-                // Caduta più veloce
                 _rigidbody.AddForce(Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * _rigidbody.mass, ForceMode.Force);
             }
             else if (_rigidbody.linearVelocity.y > 0 && !Input.GetKey(KeyCode.Space))
             {
-                // Se rilasci lo spazio prima della fine del salto, salta meno in alto
                 _rigidbody.AddForce(Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * _rigidbody.mass, ForceMode.Force);
             }
         }
@@ -146,20 +147,41 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
 
         _fullnessPercent = Mathf.InverseLerp(-1f, 1f, fullnessController.CurrentFullness);
 
-        // Scala velocità base in base alla fullness
         baseWalkSpeed = Mathf.Lerp(1f, 3f, _fullnessPercent);
         baseRunSpeed = Mathf.Lerp(2f, 6f, _fullnessPercent);
 
-        // Stato “trascinamento”
         if (_fullnessPercent <= 0.05f)
         {
             baseWalkSpeed = 0.5f;
             baseRunSpeed = 0.5f;
-            // animator?.SetBool("IsCrawling", true);
         }
-        else
+
+        // AGGIUNTA: aggiornamento parametro IsAlmostEmpty
+        if (animator != null)
         {
-            // animator?.SetBool("IsCrawling", false);
+            animator.SetBool("IsAlmostEmpty", _fullnessPercent < 0.25f);
         }
     }
+
+
+    // -------------------------------
+    //     AGGIORNAMENTO ANIMATOR
+    // -------------------------------
+    private void UpdateAnimator()
+    {
+        if (animator == null) return;
+
+        // Velocità sul piano
+        Vector3 horizontalVelocity = new Vector3(_rigidbody.linearVelocity.x, 0f, _rigidbody.linearVelocity.z);
+        float speed = horizontalVelocity.magnitude;
+        animator.SetFloat("Speed", speed);
+
+        // Velocità verticale
+        float verticalVelocity = _rigidbody.linearVelocity.y;
+        animator.SetFloat("VerticalVelocity", verticalVelocity);
+
+        // Controllo se a terra
+        animator.SetBool("IsGrounded", _isGrounded);
+    }
+
 }
