@@ -4,8 +4,8 @@ using UnityEngine.Events;
 [System.Serializable]
 public class MusicSetting
 {
-    public string clipName;        // Nome della traccia
-    [Range(0f, 1f)] public float volume = 1f; // Volume relativo
+    public string clipName;
+    [Range(0f, 1f)] public float volume = 1f;
 }
 
 public class FullnessController : MonoBehaviour
@@ -26,7 +26,7 @@ public class FullnessController : MonoBehaviour
 
     [Header("Music Settings")]
     [SerializeField] private MusicSetting _musicAbove75 = new MusicSetting { clipName = "Main1", volume = 1f };
-    [SerializeField] private MusicSetting _musicAbove50 = new MusicSetting { clipName = "Main1", volume = 0.8f }; // pitch più basso
+    [SerializeField] private MusicSetting _musicAbove50 = new MusicSetting { clipName = "Main1", volume = 0.8f };
     [SerializeField] private MusicSetting _musicAbove25 = new MusicSetting { clipName = "Main2", volume = 1f };
     [SerializeField] private MusicSetting _musicBelow25 = new MusicSetting { clipName = "Main3", volume = 1f };
 
@@ -50,6 +50,11 @@ public class FullnessController : MonoBehaviour
 
         _materialInstance = _targetRenderer.material;
         ApplyFullness();
+    }
+
+    private void Start()
+    {
+        // Garantisce che SoundManager sia pronto
         EvaluateFullnessState();
     }
 
@@ -98,39 +103,36 @@ public class FullnessController : MonoBehaviour
 
         _currentState = newState;
 
-        if (SoundManager.Instance != null)
+        var sm = SoundManager.Instance;
+        if (sm != null)
         {
             // Reset pitch di default
-            SoundManager.Instance.musicSourceA.pitch = 1f;
-            SoundManager.Instance.musicSourceB.pitch = 1f;
+            sm.musicSourceA.pitch = 1f;
+            sm.musicSourceB.pitch = 1f;
         }
 
         switch (newState)
         {
             case 1:
                 _onFullness100to75?.Invoke();
-                SoundManager.Instance?.PlayMusic(_musicAbove75.clipName, _musicAbove75.volume);
+                sm?.PlayMusic(_musicAbove75.clipName, _musicAbove75.volume);
                 break;
-
             case 2:
                 _onFullness74to50?.Invoke();
-                if (SoundManager.Instance != null)
+                if (sm != null)
                 {
-                    SoundManager.Instance.PlayMusic(_musicAbove50.clipName, _musicAbove50.volume);
-                    // Pitch più basso per questa fascia
-                    SoundManager.Instance.musicSourceA.pitch = 0.8f;
-                    SoundManager.Instance.musicSourceB.pitch = 0.8f;
+                    sm.PlayMusic(_musicAbove50.clipName, _musicAbove50.volume);
+                    sm.musicSourceA.pitch = 0.8f;
+                    sm.musicSourceB.pitch = 0.8f;
                 }
                 break;
-
             case 3:
                 _onFullness49to25?.Invoke();
-                SoundManager.Instance?.PlayMusic(_musicAbove25.clipName, _musicAbove25.volume);
+                sm?.PlayMusic(_musicAbove25.clipName, _musicAbove25.volume);
                 break;
-
             case 4:
                 _onFullnessBelow25?.Invoke();
-                SoundManager.Instance?.PlayMusic(_musicBelow25.clipName, _musicBelow25.volume);
+                sm?.PlayMusic(_musicBelow25.clipName, _musicBelow25.volume);
                 break;
         }
     }

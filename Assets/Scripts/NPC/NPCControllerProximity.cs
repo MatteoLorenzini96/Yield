@@ -38,7 +38,9 @@ public class NPCControllerProximity : MonoBehaviour
     private NPCFullnessController _npcFullness;
     private FullnessController _playerFullness;
 
-    // Evento per notificare quando il Giver viene distrutto
+    // Animator
+    private Animator animator;
+
     public event Action OnGiverDestroyed;
 
     public bool IsGiver => isGiver;
@@ -50,13 +52,19 @@ public class NPCControllerProximity : MonoBehaviour
         _npcFullness = GetComponent<NPCFullnessController>();
         _spawnPosition = transform.position;
 
+        animator = GetComponentInChildren<Animator>();
+        if (animator == null)
+            Debug.LogError($"{name}: Nessun Animator trovato!");
+
         if (_detectionTrigger == null)
         {
             Debug.LogError($"{name}: assegna un SphereCollider per la rilevazione!");
             enabled = false;
             return;
         }
-        if (!_detectionTrigger.isTrigger) _detectionTrigger.isTrigger = true;
+
+        if (!_detectionTrigger.isTrigger)
+            _detectionTrigger.isTrigger = true;
 
         if (_player != null)
             _playerFullness = _player.GetComponent<FullnessController>();
@@ -80,6 +88,11 @@ public class NPCControllerProximity : MonoBehaviour
             if (et != null)
                 et.OnLeftClick.RemoveListener(OnPlayerInteraction);
         }
+    }
+
+    private void Update()
+    {
+        UpdateAnimator();
     }
 
     private void OnPlayerInteraction()
@@ -112,13 +125,16 @@ public class NPCControllerProximity : MonoBehaviour
 
     public void StopMovement()
     {
-        if (_activeRoutine != null) StopCoroutine(_activeRoutine);
+        if (_activeRoutine != null)
+            StopCoroutine(_activeRoutine);
+
         _activeRoutine = null;
         _agent.isStopped = true;
+
         Debug.Log($"{name} ha fermato il movimento");
     }
 
-    // ───────────── Metodi pubblici per NPCBehaviorByPlayerProximity ─────────────
+    // ───────────── Metodi pubblici ─────────────
     public void WanderSlow() => RestartRoutine(WanderRoutine());
     public void ApproachPlayer() => RestartRoutine(ApproachRoutine());
     public void BlockPlayer() => RestartRoutine(BlockRoutine());
@@ -130,40 +146,53 @@ public class NPCControllerProximity : MonoBehaviour
         while (_playerInRange || isGiver)
         {
             Vector3 randomDir = UnityEngine.Random.insideUnitSphere * wanderRadius + transform.position;
+
             if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, wanderRadius, NavMesh.AllAreas))
             {
                 _agent.isStopped = false;
                 _agent.speed = wanderSpeed;
                 _agent.SetDestination(hit.position);
             }
+
             yield return new WaitForSeconds(wanderDelay);
         }
+
         _agent.isStopped = true;
     }
 
     private IEnumerator ApproachRoutine()
     {
         _agent.speed = approachSpeed;
+
         while (_playerInRange && _player != null)
         {
             float dist = Vector3.Distance(transform.position, _player.position);
             _agent.isStopped = dist <= stopDistance;
-            if (!_agent.isStopped) _agent.SetDestination(_player.position);
+
+            if (!_agent.isStopped)
+                _agent.SetDestination(_player.position);
+
             yield return null;
         }
+
         _agent.isStopped = true;
     }
 
     private IEnumerator BlockRoutine()
     {
         _agent.speed = blockSpeed;
+
         while (_playerInRange && _player != null)
         {
             float dist = Vector3.Distance(transform.position, _player.position);
             _agent.isStopped = dist <= stopDistance;
-            if (!_agent.isStopped) _agent.SetDestination(_player.position);
+
+            if (!_agent.isStopped)
+                _agent.SetDestination(_player.position);
+
             yield return null;
         }
+
         _agent.isStopped = true;
     }
 
@@ -182,6 +211,7 @@ public class NPCControllerProximity : MonoBehaviour
             if (fromPlayer.magnitude < safeDistance)
             {
                 Vector3 targetPos = transform.position + fromPlayer.normalized * safeDistance;
+
                 if (NavMesh.SamplePosition(targetPos, out NavMeshHit hit, safeDistance, NavMesh.AllAreas))
                 {
                     _agent.isStopped = false;
@@ -193,7 +223,6 @@ public class NPCControllerProximity : MonoBehaviour
                 _agent.isStopped = true;
                 _isRunningAway = false;
 
-                // Se è un Giver, distruggilo e chiama l'evento
                 if (isGiver)
                 {
                     Debug.Log($"{name} è stato distrutto dopo aver raggiunto la safe distance");
@@ -212,21 +241,23 @@ public class NPCControllerProximity : MonoBehaviour
     {
         Debug.Log($"{name} ha iniziato GiverRoutine");
 
-        // Muoviti intorno al spawn finché il player non entra
         while (!_playerInRange)
         {
             Vector3 randomDir = UnityEngine.Random.insideUnitSphere * spawnWanderRadius + _spawnPosition;
+
             if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, spawnWanderRadius, NavMesh.AllAreas))
             {
                 _agent.isStopped = false;
                 _agent.speed = wanderSpeed;
                 _agent.SetDestination(hit.position);
             }
+
             yield return new WaitForSeconds(wanderDelay);
         }
 
         Debug.Log($"{name} si sta avvicinando al player");
         _agent.speed = approachSpeed;
+
         while (Vector3.Distance(transform.position, _player.position) > stopDistance)
         {
             _agent.isStopped = false;
@@ -234,12 +265,11 @@ public class NPCControllerProximity : MonoBehaviour
             yield return null;
         }
 
-        // Lerpa la fulleness del player e svuota la propria
         if (_playerFullness != null && _npcFullness != null)
         {
             float startPlayer = _playerFullness.CurrentFullness;
             float startNPC = _npcFullness.CurrentFullness;
-            float duration = 3f; // più lento
+            float duration = 3f;
             float elapsed = 0f;
 
             while (elapsed < duration)
@@ -253,6 +283,7 @@ public class NPCControllerProximity : MonoBehaviour
 
             _playerFullness.SetFullness(1f);
             _npcFullness.SetFullness(-1f);
+
             Debug.Log($"{name} ha ricaricato il player e svuotato la propria fulleness");
         }
 
@@ -262,7 +293,22 @@ public class NPCControllerProximity : MonoBehaviour
 
     private void RestartRoutine(IEnumerator routine)
     {
-        if (_activeRoutine != null) StopCoroutine(_activeRoutine);
+        if (_activeRoutine != null)
+            StopCoroutine(_activeRoutine);
+
         _activeRoutine = StartCoroutine(routine);
+    }
+
+    // ───────────── ANIMATOR UPDATE ─────────────
+    private void UpdateAnimator()
+    {
+        if (animator == null || _agent == null)
+            return;
+
+        // Magnitude velocità orizzontale = input del Blend Tree
+        Vector3 horizontalVel = new Vector3(_agent.velocity.x, 0f, _agent.velocity.z);
+        float speed = horizontalVel.magnitude;
+
+        animator.SetFloat("Speed", speed);
     }
 }
