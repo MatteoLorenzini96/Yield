@@ -21,6 +21,9 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private FullnessController fullnessController;
 
+    [Header("Boost Modifier")]
+    [SerializeField] private float speedBoostModifier = 1f; // default 1 = nessun boost
+
     private Rigidbody _rigidbody;
     private Animator animator;
 
@@ -28,6 +31,24 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
     private float _currentSpeed;
     private bool _isGrounded;
     private float _fullnessPercent;
+
+    public float BaseWalkSpeed
+    {
+        get => baseWalkSpeed;
+        set => baseWalkSpeed = value;
+    }
+
+    public float BaseRunSpeed
+    {
+        get => baseRunSpeed;
+        set => baseRunSpeed = value;
+    }
+
+    public float SpeedBoostModifier
+    {
+        get => speedBoostModifier;
+        set => speedBoostModifier = value;
+    }
 
     private void Awake()
     {
@@ -48,7 +69,7 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
         UpdateFullnessEffect();
         CheckGround();
         ApplyBetterJumpPhysics();
-        UpdateAnimator();     // <-- AGGIUNTO
+        UpdateAnimator();
     }
 
     private void FixedUpdate()
@@ -73,9 +94,7 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
         _currentSpeed = isRunning ? baseRunSpeed : baseWalkSpeed;
 
         if (Input.GetKeyDown(KeyCode.Space))
-        {
             TryJump();
-        }
     }
 
     private void Move()
@@ -106,20 +125,17 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
     {
         Vector3 origin = groundCheck != null ? groundCheck.position : transform.position + Vector3.up * 0.1f;
         float distance = groundCheck != null ? groundCheckDistance : 0.6f;
-
         _isGrounded = Physics.Raycast(origin, Vector3.down, distance, groundMask);
     }
 
     private void TryJump()
     {
-        if (!_isGrounded)
-            return;
+        if (!_isGrounded) return;
 
         float fullness = fullnessController != null ? fullnessController.CurrentFullness : 1f;
         _fullnessPercent = Mathf.InverseLerp(-1f, 1f, fullness);
 
-        if (_fullnessPercent < 0.25f)
-            return;
+        if (_fullnessPercent < 0.25f) return;
 
         float jumpForce = baseJumpForce * Mathf.Lerp(0.4f, 1f, _fullnessPercent);
         _rigidbody.linearVelocity = new Vector3(_rigidbody.linearVelocity.x, 0f, _rigidbody.linearVelocity.z);
@@ -131,13 +147,9 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
         if (!_isGrounded)
         {
             if (_rigidbody.linearVelocity.y < 0)
-            {
                 _rigidbody.AddForce(Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * _rigidbody.mass, ForceMode.Force);
-            }
             else if (_rigidbody.linearVelocity.y > 0 && !Input.GetKey(KeyCode.Space))
-            {
                 _rigidbody.AddForce(Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * _rigidbody.mass, ForceMode.Force);
-            }
         }
     }
 
@@ -147,41 +159,30 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
 
         _fullnessPercent = Mathf.InverseLerp(-1f, 1f, fullnessController.CurrentFullness);
 
-        baseWalkSpeed = Mathf.Lerp(1f, 3f, _fullnessPercent);
-        baseRunSpeed = Mathf.Lerp(2f, 6f, _fullnessPercent);
+        baseWalkSpeed = Mathf.Lerp(1f, 3f, _fullnessPercent) * speedBoostModifier;
+        baseRunSpeed = Mathf.Lerp(2f, 6f, _fullnessPercent) * speedBoostModifier;
 
         if (_fullnessPercent <= 0.05f)
         {
-            baseWalkSpeed = 0.5f;
-            baseRunSpeed = 0.5f;
+            baseWalkSpeed = 0.5f * speedBoostModifier;
+            baseRunSpeed = 0.5f * speedBoostModifier;
         }
 
-        // AGGIUNTA: aggiornamento parametro IsAlmostEmpty
         if (animator != null)
-        {
             animator.SetBool("IsAlmostEmpty", _fullnessPercent < 0.25f);
-        }
     }
 
-
-    // -------------------------------
-    //     AGGIORNAMENTO ANIMATOR
-    // -------------------------------
     private void UpdateAnimator()
     {
         if (animator == null) return;
 
-        // Velocità sul piano
         Vector3 horizontalVelocity = new Vector3(_rigidbody.linearVelocity.x, 0f, _rigidbody.linearVelocity.z);
         float speed = horizontalVelocity.magnitude;
         animator.SetFloat("Speed", speed);
 
-        // Velocità verticale
         float verticalVelocity = _rigidbody.linearVelocity.y;
         animator.SetFloat("VerticalVelocity", verticalVelocity);
 
-        // Controllo se a terra
         animator.SetBool("IsGrounded", _isGrounded);
     }
-
 }

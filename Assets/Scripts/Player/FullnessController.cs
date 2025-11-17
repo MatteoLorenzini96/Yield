@@ -37,6 +37,10 @@ public class FullnessController : MonoBehaviour
     private float _lastFullness = Mathf.Infinity;
     private int _currentState = -1;
 
+    // Flag per forzare la musica del case 1 la prima volta che entriamo nel case 3
+    private bool _forceCase1UntilFull = false;
+    private bool _firstCase3Encountered = false;
+
     public float CurrentFullness => _fullness;
 
     private void Awake()
@@ -54,7 +58,7 @@ public class FullnessController : MonoBehaviour
 
     private void Start()
     {
-        // Garantisce che SoundManager sia pronto
+        // Imposta subito la musica corretta all'avvio
         EvaluateFullnessState();
     }
 
@@ -89,6 +93,9 @@ public class FullnessController : MonoBehaviour
 
     private void EvaluateFullnessState()
     {
+        var sm = SoundManager.Instance;
+
+        // Calcola lo stato corrente
         float percent = Mathf.InverseLerp(-1f, 1f, _fullness) * 100f;
         int newState = percent switch
         {
@@ -98,15 +105,43 @@ public class FullnessController : MonoBehaviour
             _ => 4
         };
 
-        if (newState == _currentState)
+        // Gestione speciale: prima volta che si entra nel case 3
+        if (newState == 3 && !_firstCase3Encountered)
+        {
+            _firstCase3Encountered = true;
+            _forceCase1UntilFull = true;
+            _currentState = 1; // forza case 1
+            _onFullness100to75?.Invoke();
+            sm?.PlayMusic(_musicAbove75.clipName, _musicAbove75.volume);
             return;
+        }
+
+        // Se il flag è attivo, blocca solo se siamo ancora sotto 1
+        if (_forceCase1UntilFull)
+        {
+            if (_fullness >= 1f)
+            {
+                _forceCase1UntilFull = false; // sblocca
+            }
+            else
+            {
+                if (_currentState != 1)
+                {
+                    _currentState = 1;
+                    _onFullness100to75?.Invoke();
+                    sm?.PlayMusic(_musicAbove75.clipName, _musicAbove75.volume);
+                }
+                return;
+            }
+        }
+
+        // Se il nuovo stato è uguale al corrente, non fare nulla
+        if (newState == _currentState) return;
 
         _currentState = newState;
 
-        var sm = SoundManager.Instance;
         if (sm != null)
         {
-            // Reset pitch di default
             sm.musicSourceA.pitch = 1f;
             sm.musicSourceB.pitch = 1f;
         }
@@ -136,4 +171,5 @@ public class FullnessController : MonoBehaviour
                 break;
         }
     }
+
 }

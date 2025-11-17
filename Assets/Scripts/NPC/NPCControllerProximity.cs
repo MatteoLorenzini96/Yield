@@ -37,12 +37,9 @@ public class NPCControllerProximity : MonoBehaviour
 
     private NPCFullnessController _npcFullness;
     private FullnessController _playerFullness;
-
-    // Animator
     private Animator animator;
 
     public event Action OnGiverDestroyed;
-
     public bool IsGiver => isGiver;
     public bool HasBeenInteracted => _hasBeenInteracted;
 
@@ -63,8 +60,7 @@ public class NPCControllerProximity : MonoBehaviour
             return;
         }
 
-        if (!_detectionTrigger.isTrigger)
-            _detectionTrigger.isTrigger = true;
+        _detectionTrigger.isTrigger = true;
 
         if (_player != null)
             _playerFullness = _player.GetComponent<FullnessController>();
@@ -130,17 +126,14 @@ public class NPCControllerProximity : MonoBehaviour
 
         _activeRoutine = null;
         _agent.isStopped = true;
-
-        Debug.Log($"{name} ha fermato il movimento");
     }
 
-    // ───────────── Metodi pubblici ─────────────
+    // ───────────── Coroutine principali ─────────────
     public void WanderSlow() => RestartRoutine(WanderRoutine());
     public void ApproachPlayer() => RestartRoutine(ApproachRoutine());
     public void BlockPlayer() => RestartRoutine(BlockRoutine());
     public void RunAway() => RestartRoutine(RunAwayRoutine());
 
-    // ───────────── Coroutine ─────────────
     private IEnumerator WanderRoutine()
     {
         while (_playerInRange || isGiver)
@@ -225,7 +218,6 @@ public class NPCControllerProximity : MonoBehaviour
 
                 if (isGiver)
                 {
-                    Debug.Log($"{name} è stato distrutto dopo aver raggiunto la safe distance");
                     OnGiverDestroyed?.Invoke();
                     Destroy(gameObject);
                 }
@@ -239,8 +231,6 @@ public class NPCControllerProximity : MonoBehaviour
 
     private IEnumerator GiverRoutine()
     {
-        Debug.Log($"{name} ha iniziato GiverRoutine");
-
         while (!_playerInRange)
         {
             Vector3 randomDir = UnityEngine.Random.insideUnitSphere * spawnWanderRadius + _spawnPosition;
@@ -255,7 +245,6 @@ public class NPCControllerProximity : MonoBehaviour
             yield return new WaitForSeconds(wanderDelay);
         }
 
-        Debug.Log($"{name} si sta avvicinando al player");
         _agent.speed = approachSpeed;
 
         while (Vector3.Distance(transform.position, _player.position) > stopDistance)
@@ -265,6 +254,7 @@ public class NPCControllerProximity : MonoBehaviour
             yield return null;
         }
 
+        // Trasferimento fulleness
         if (_playerFullness != null && _npcFullness != null)
         {
             float startPlayer = _playerFullness.CurrentFullness;
@@ -284,10 +274,12 @@ public class NPCControllerProximity : MonoBehaviour
             _playerFullness.SetFullness(1f);
             _npcFullness.SetFullness(-1f);
 
-            Debug.Log($"{name} ha ricaricato il player e svuotato la propria fulleness");
+            // ⚡ Attiva boost velocità
+            var speedBoost = _player.GetComponent<PlayerSpeedBoost>();
+            if (speedBoost != null)
+                speedBoost.ActivateBoost();
         }
 
-        Debug.Log($"{name} sta fuggendo");
         yield return RunAwayRoutine();
     }
 
@@ -299,13 +291,10 @@ public class NPCControllerProximity : MonoBehaviour
         _activeRoutine = StartCoroutine(routine);
     }
 
-    // ───────────── ANIMATOR UPDATE ─────────────
     private void UpdateAnimator()
     {
-        if (animator == null || _agent == null)
-            return;
+        if (animator == null || _agent == null) return;
 
-        // Magnitude velocità orizzontale = input del Blend Tree
         Vector3 horizontalVel = new Vector3(_agent.velocity.x, 0f, _agent.velocity.z);
         float speed = horizontalVel.magnitude;
 

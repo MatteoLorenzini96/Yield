@@ -62,12 +62,11 @@ public class EnergyTransfer : MonoBehaviour
     private void HandleGiverDestroyed()
     {
         _giverDestroyed = true;
-        Debug.Log("Giver distrutto: EnergyTransfer ora abilitato");
     }
 
     private void HandleTransferRequest()
     {
-        if (!_giverDestroyed) return; // Ignora finché il Giver non è distrutto
+        if (!_giverDestroyed) return;
         if (_inTransfer || _closestNPC == null) return;
 
         float maxTransferable = _playerFullness.CurrentFullness - (-1f);
@@ -142,6 +141,11 @@ public class EnergyTransfer : MonoBehaviour
 
         float returnAmount = actualTransfer * npcMultiplier * playerReturnFraction;
         _playerFullness.SetFullness(Mathf.Clamp(_playerFullness.CurrentFullness + returnAmount, -1f, 1f));
+
+        // ⚡ Attiva boost velocità
+        var speedBoost = GetComponent<PlayerSpeedBoost>();
+        if (speedBoost != null)
+            speedBoost.ActivateBoost();
 
         _inTransfer = false;
         UpdateClosestNPC();
