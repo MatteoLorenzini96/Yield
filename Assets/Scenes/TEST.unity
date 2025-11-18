@@ -630,7 +630,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetRenderer: {fileID: 1901564462}
-  _fullness: -0.2
+  _fullness: -0.8
   _transitionSpeed: 2
 --- !u!195 &252421505
 NavMeshAgent:
@@ -687,7 +687,7 @@ MonoBehaviour:
   approachSpeed: 4
   blockSpeed: 3
   runAwaySpeed: 5
-  stopDistance: 1.5
+  stopDistance: 2
   wanderRadius: 2
   wanderDelay: 2.5
   safeDistance: 30
@@ -2206,8 +2206,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -9.56, y: 0, z: 0}
-  m_LocalScale: {x: 2.97, y: 2.97, z: 2.97}
-  m_ConstrainProportionsScale: 1
+  m_LocalScale: {x: 0, y: 2.97, z: 2.97}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

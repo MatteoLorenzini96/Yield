@@ -52,7 +52,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _FresnerPower: 1.76
-    - _Fullness: 1
+    - _Fullness: -1
     - _QueueControl: 0
     - _QueueOffset: 0
     - _WaveVelocity: 1
