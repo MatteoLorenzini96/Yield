@@ -43,6 +43,7 @@ public class NPCControllerProximity : MonoBehaviour
     public bool IsGiver => isGiver;
     public bool HasBeenInteracted => _hasBeenInteracted;
 
+    
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
@@ -64,6 +65,16 @@ public class NPCControllerProximity : MonoBehaviour
 
         if (_player != null)
             _playerFullness = _player.GetComponent<FullnessController>();
+    }
+
+    void Start()
+    {
+        if (isGiver)
+        {
+            var et = _player.GetComponent<EnergyTransfer>();
+            et.SubscribeToGiver(this);
+        }
+        UpdateAnimator();
     }
 
     private void OnEnable()
@@ -295,9 +306,20 @@ public class NPCControllerProximity : MonoBehaviour
     {
         if (animator == null || _agent == null) return;
 
+        // Velocità movimento
         Vector3 horizontalVel = new Vector3(_agent.velocity.x, 0f, _agent.velocity.z);
         float speed = horizontalVel.magnitude;
-
         animator.SetFloat("Speed", speed);
+
+        // --- Fullness → Animator (IsAlmostEmpty) ---
+        if (!isGiver && _npcFullness != null)
+        {
+            float fullness = _npcFullness.CurrentFullness;   // Range -1 → 1
+
+            // 24% convertito nel range -1 → 1 = -0.52
+            bool isAlmostEmpty = fullness < -0.52f;
+
+            animator.SetBool("IsAlmostEmpty", isAlmostEmpty);
+        }
     }
 }
