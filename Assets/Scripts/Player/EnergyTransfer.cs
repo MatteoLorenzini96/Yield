@@ -10,12 +10,6 @@ public class EnergyTransfer : MonoBehaviour
     [SerializeField] private SphereCollider detectionTrigger;
     [SerializeField] private string npcTag = "NPC";
 
-    [Header("Transfer Settings")]
-    [SerializeField] private float transferAmount = 0.1f;
-    [SerializeField] private float npcMultiplier = 5f;
-    [SerializeField] private float playerReturnFraction = 0.05f;
-    [SerializeField] private float transferDuration = 1f;
-
     [Header("Input Event")]
     public UnityEvent OnLeftClick = new UnityEvent();
 
@@ -69,12 +63,19 @@ public class EnergyTransfer : MonoBehaviour
         if (!_giverDestroyed) return;
         if (_inTransfer || _closestNPC == null) return;
 
+        // 🔥 Fermati se l’NPC è già al massimo
+        if (_closestNPC.CurrentFullness >= 1f)
+            return;
+
+        float transferAmount = GameManager.Instance.transferAmount;
+
         float maxTransferable = _playerFullness.CurrentFullness - (-1f);
         if (maxTransferable <= 0f) return;
 
         float actualTransfer = Mathf.Min(transferAmount, maxTransferable);
         StartCoroutine(TransferEnergyRoutine(_closestNPC, actualTransfer));
     }
+
 
     private void OnTriggerEnter(Collider other)
     {
@@ -120,6 +121,11 @@ public class EnergyTransfer : MonoBehaviour
     {
         _inTransfer = true;
 
+        // Retrieve dynamic values from GameManager
+        float npcMultiplier = GameManager.Instance.npcMultiplier;
+        float playerReturnFraction = GameManager.Instance.playerReturnFraction;
+        float transferDuration = GameManager.Instance.transferDuration;
+
         float playerStart = _playerFullness.CurrentFullness;
         float playerTarget = Mathf.Clamp(playerStart - actualTransfer, -1f, 1f);
 
@@ -142,7 +148,7 @@ public class EnergyTransfer : MonoBehaviour
         float returnAmount = actualTransfer * npcMultiplier * playerReturnFraction;
         _playerFullness.SetFullness(Mathf.Clamp(_playerFullness.CurrentFullness + returnAmount, -1f, 1f));
 
-        // ⚡ Attiva boost velocità
+        // Boost
         var speedBoost = GetComponent<PlayerSpeedBoost>();
         if (speedBoost != null)
             speedBoost.ActivateBoost();
