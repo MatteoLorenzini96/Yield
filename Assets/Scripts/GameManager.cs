@@ -10,8 +10,8 @@ public class GameManager : MonoBehaviour
     public float playerReturnFraction = 0.05f;
     public float transferDuration = 1f;
 
-    private float logTimer = 0f;
-    public float logInterval = 1f; // stampa una volta al secondo
+    //private float logTimer = 0f;
+    //public float logInterval = 1f; // stampa una volta al secondo
 
     private void Awake()
     {
@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
+    /*
     private void Update()
     {
         logTimer += Time.deltaTime;
@@ -41,6 +42,7 @@ public class GameManager : MonoBehaviour
             logTimer = 0f;
         }
     }
+    */
 
     // -----------------------------------------
     // FUNCTIONS TO CHANGE VALUES RUNTIME
