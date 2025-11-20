@@ -67,7 +67,7 @@ public class EnergyTransfer : MonoBehaviour
         if (_closestNPC.CurrentFullness >= 1f)
             return;
 
-        float transferAmount = GameManager.Instance.transferAmount;
+        float transferAmount = EnergyTransferManager.Instance.transferAmount;
 
         float maxTransferable = _playerFullness.CurrentFullness - (-1f);
         if (maxTransferable <= 0f) return;
@@ -121,10 +121,10 @@ public class EnergyTransfer : MonoBehaviour
     {
         _inTransfer = true;
 
-        // Retrieve dynamic values from GameManager
-        float npcMultiplier = GameManager.Instance.npcMultiplier;
-        float playerReturnFraction = GameManager.Instance.playerReturnFraction;
-        float transferDuration = GameManager.Instance.transferDuration;
+        // Retrieve dynamic values from EnergyTransferManager
+        float npcMultiplier = EnergyTransferManager.Instance.npcMultiplier;
+        float playerReturnFraction = EnergyTransferManager.Instance.playerReturnFraction;
+        float transferDuration = EnergyTransferManager.Instance.transferDuration;
 
         float playerStart = _playerFullness.CurrentFullness;
         float playerTarget = Mathf.Clamp(playerStart - actualTransfer, -1f, 1f);

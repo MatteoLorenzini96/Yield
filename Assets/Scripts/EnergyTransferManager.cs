@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class EnergyTransferManager : MonoBehaviour
 {
-    public static GameManager Instance;
+    public static EnergyTransferManager Instance;
 
     [Header("Energy Transfer Settings")]
     public float transferAmount = 0.1f;
