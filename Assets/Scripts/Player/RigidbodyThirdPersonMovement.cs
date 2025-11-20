@@ -9,6 +9,9 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
     [SerializeField] private float acceleration = 15f;
     [SerializeField] private float rotationSpeed = 10f;
 
+    [Header("Jump Enable/Disable")]
+    [SerializeField] private bool canJump = true;
+
     [Header("Jump Settings")]
     [SerializeField] private float baseJumpForce = 5f;
     [SerializeField] private float fallMultiplier = 2.5f;
@@ -17,12 +20,19 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
     [SerializeField] private float groundCheckDistance = 0.4f;
     [SerializeField] private LayerMask groundMask;
 
+
+    public bool CanJump
+    {
+        get => canJump;
+        set => canJump = value;
+    }
+
     [Header("References")]
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private FullnessController fullnessController;
 
     [Header("Boost Modifier")]
-    [SerializeField] private float speedBoostModifier = 1f; // default 1 = nessun boost
+    [SerializeField] private float speedBoostModifier = 1f;
 
     private Rigidbody _rigidbody;
     private Animator animator;
@@ -130,6 +140,7 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
 
     private void TryJump()
     {
+        if (!canJump) return;            // <--- BOOLEANA CHE DISABILITA IL SALTO
         if (!_isGrounded) return;
 
         float fullness = fullnessController != null ? fullnessController.CurrentFullness : 1f;
