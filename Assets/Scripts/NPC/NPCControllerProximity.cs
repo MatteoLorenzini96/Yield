@@ -40,10 +40,11 @@ public class NPCControllerProximity : MonoBehaviour
     private Animator animator;
 
     public event Action OnGiverDestroyed;
+    public event Action OnFinishedRunAway; // 🔹 Nuovo evento
+
     public bool IsGiver => isGiver;
     public bool HasBeenInteracted => _hasBeenInteracted;
 
-    
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
@@ -224,13 +225,21 @@ public class NPCControllerProximity : MonoBehaviour
             }
             else
             {
-                _agent.isStopped = true;
-                _isRunningAway = false;
-
+                // Se l’NPC è Giver → distruggi
                 if (isGiver)
                 {
+                    _agent.isStopped = true;
+                    _isRunningAway = false;
+                    OnFinishedRunAway?.Invoke();
                     OnGiverDestroyed?.Invoke();
                     Destroy(gameObject);
+                }
+                else
+                {
+                    // Non Giver → rimani in RunAway ma fermo
+                    _agent.isStopped = true;
+                    OnFinishedRunAway?.Invoke();
+                    // rimane _isRunningAway = true, continuerà a controllare il player
                 }
             }
 
@@ -285,7 +294,6 @@ public class NPCControllerProximity : MonoBehaviour
             _playerFullness.SetFullness(1f);
             _npcFullness.SetFullness(-1f);
 
-            // ⚡ Attiva boost velocità
             var speedBoost = _player.GetComponent<PlayerSpeedBoost>();
             if (speedBoost != null)
                 speedBoost.ActivateBoost();
@@ -306,19 +314,14 @@ public class NPCControllerProximity : MonoBehaviour
     {
         if (animator == null || _agent == null) return;
 
-        // Velocità movimento
         Vector3 horizontalVel = new Vector3(_agent.velocity.x, 0f, _agent.velocity.z);
         float speed = horizontalVel.magnitude;
         animator.SetFloat("Speed", speed);
 
-        // --- Fullness → Animator (IsAlmostEmpty) ---
         if (!isGiver && _npcFullness != null)
         {
-            float fullness = _npcFullness.CurrentFullness;   // Range -1 → 1
-
-            // 24% convertito nel range -1 → 1 = -0.52
+            float fullness = _npcFullness.CurrentFullness;
             bool isAlmostEmpty = fullness < -0.52f;
-
             animator.SetBool("IsAlmostEmpty", isAlmostEmpty);
         }
     }

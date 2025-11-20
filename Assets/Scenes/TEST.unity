@@ -119,6 +119,24 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &1369403496 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 744488846746080438, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+  m_PrefabInstance: {fileID: 5253659124022890596}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1369403499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369403496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86a25781376e79c43a53242105e15b9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _activeNPCs: []
 --- !u!1001 &5253659124022890596
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -127,6 +145,38 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[4].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[4].m_Target
+      value: 
+      objectReference: {fileID: 1369403499}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[4].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[4].m_MethodName
+      value: MakeAllBlockPlayer
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[4].m_TargetAssemblyTypeName
+      value: NPCManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[4].m_Arguments.m_FloatArgument
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[4].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 4054529302182801271, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -167,6 +217,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6721370928740863008, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: canJump
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7386376003697255636, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: m_Name
       value: BasicLevel
@@ -174,7 +228,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 744488846746080438, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1369403499}
   m_SourcePrefab: {fileID: 100100000, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
