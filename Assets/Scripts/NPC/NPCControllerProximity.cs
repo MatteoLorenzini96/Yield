@@ -28,12 +28,18 @@ public class NPCControllerProximity : MonoBehaviour
     [SerializeField] private bool isGiver = false;
     [SerializeField] private float spawnWanderRadius = 2f;
 
+    [Header("VFX & SFX Settings")]
+    [SerializeField] private ParticleSystem fullVFX;
+    [SerializeField] private GameObject fullVFXObject;
+    [SerializeField] private string fullSFXName;
+
     private Vector3 _spawnPosition;
     private NavMeshAgent _agent;
     private Coroutine _activeRoutine;
     private bool _isRunningAway;
     private bool _playerInRange = false;
     private bool _hasBeenInteracted = false;
+    private bool hasPlayedFullVFX = false;
 
     private NPCFullnessController _npcFullness;
     private FullnessController _playerFullness;
@@ -51,6 +57,11 @@ public class NPCControllerProximity : MonoBehaviour
         _npcFullness = GetComponent<NPCFullnessController>();
         _spawnPosition = transform.position;
 
+        if (fullVFX != null)
+        {
+            fullVFX.Stop();
+        }
+
         animator = GetComponentInChildren<Animator>();
         if (animator == null)
             Debug.LogError($"{name}: Nessun Animator trovato!");
@@ -66,6 +77,7 @@ public class NPCControllerProximity : MonoBehaviour
 
         if (_player != null)
             _playerFullness = _player.GetComponent<FullnessController>();
+        
     }
 
     void Start()
@@ -203,6 +215,12 @@ public class NPCControllerProximity : MonoBehaviour
 
     private IEnumerator RunAwayRoutine()
     {
+        if (!isGiver && !hasPlayedFullVFX && _npcFullness != null && _npcFullness.CurrentFullness >= 1f)
+        {
+            hasPlayedFullVFX = true;
+            PlayFullVFX();
+        }
+
         _isRunningAway = true;
         _agent.speed = runAwaySpeed;
 
@@ -324,5 +342,20 @@ public class NPCControllerProximity : MonoBehaviour
             bool isAlmostEmpty = fullness < -0.52f;
             animator.SetBool("IsAlmostEmpty", isAlmostEmpty);
         }
+    }
+
+    private void PlayFullVFX()
+    {
+        // ParticleSystem
+        if (fullVFX != null)
+            fullVFX.Play();
+
+        // GameObject
+        if (fullVFXObject != null)
+            fullVFXObject.SetActive(true);
+
+        // SFX tramite SoundManager
+        if (!string.IsNullOrEmpty(fullSFXName) && SoundManager.Instance != null)
+            SoundManager.Instance.PlaySFXWithPitch(fullSFXName, transform);
     }
 }
