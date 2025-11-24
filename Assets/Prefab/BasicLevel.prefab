@@ -72,6 +72,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5716967246534697798}
   - component: {fileID: 8062065746181546170}
+  - component: {fileID: 2727003254327395915}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -110,7 +111,19 @@ MonoBehaviour:
   npcMultiplier: 5
   playerReturnFraction: 0.05
   transferDuration: 1
-  logInterval: 1
+--- !u!114 &2727003254327395915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744488846746080438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86a25781376e79c43a53242105e15b9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _activeNPCs: []
 --- !u!1 &1563366120213588002
 GameObject:
   m_ObjectHideFlags: 0
@@ -1337,6 +1350,10 @@ PrefabInstance:
       propertyPath: _player
       value: 
       objectReference: {fileID: 5478589011605197009}
+    - target: {fileID: 1565892907162942286, guid: 37b8dea8b8776334188dffe857763f95, type: 3}
+      propertyPath: _transitionSpeed
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2922318565243382574, guid: 37b8dea8b8776334188dffe857763f95, type: 3}
       propertyPath: _playerFullness
       value: 
@@ -1471,6 +1488,22 @@ PrefabInstance:
       propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[3].m_Target
       value: 
       objectReference: {fileID: 8062065746181546170}
+    - target: {fileID: 1628236958696110836, guid: b719d3f451faa514b8ca39c2de37bcb8, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[4].m_Target
+      value: 
+      objectReference: {fileID: 2727003254327395915}
+    - target: {fileID: 1628236958696110836, guid: b719d3f451faa514b8ca39c2de37bcb8, type: 3}
+      propertyPath: _onFullness100to75.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1628236958696110836, guid: b719d3f451faa514b8ca39c2de37bcb8, type: 3}
+      propertyPath: _onFullness100to75.m_PersistentCalls.m_Calls.Array.data[2].m_MethodName
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1628236958696110836, guid: b719d3f451faa514b8ca39c2de37bcb8, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[4].m_MethodName
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4708425491059877161, guid: b719d3f451faa514b8ca39c2de37bcb8, type: 3}
       propertyPath: cameraTransform
       value: 
