@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MAT_Mask
-  m_Shader: {fileID: 4800000, guid: becc49405a0c8b449acc4a5e862c9c8a, type: 3}
+  m_Name: MAT_Footprints_MaskHole
+  m_Shader: {fileID: 4800000, guid: 346be7a614a584b4ca4074b0a544f044, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -25,7 +25,7 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _Radius: 0.5
+    - _Radius: 2.05
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1

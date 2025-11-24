@@ -42,6 +42,8 @@ public class RigidbodyThirdPersonMovement : MonoBehaviour
     private bool _isGrounded;
     private float _fullnessPercent;
 
+    public float CurrentSpeed => _currentSpeed;
+
     public float BaseWalkSpeed
     {
         get => baseWalkSpeed;
