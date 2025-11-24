@@ -9747,8 +9747,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 3}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 5066640649309979860}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -10019,6 +10019,7 @@ GameObject:
   - component: {fileID: 3809331930092644676}
   - component: {fileID: 440764467931146858}
   - component: {fileID: 4432501945129538953}
+  - component: {fileID: 7517654891412271491}
   m_Layer: 0
   m_Name: NPC
   m_TagString: NPC
@@ -10074,7 +10075,7 @@ MonoBehaviour:
   safeDistance: 5
   isGiver: 0
   spawnWanderRadius: 2
-  fullVFX: {fileID: 1002753474134647066}
+  fullChargeVFX: {fileID: 1002753474134647066}
   fullVFXObject: {fileID: 2395338890217785104}
   fullSFXName: 
 --- !u!114 &5138014375476777795
@@ -10092,6 +10093,7 @@ MonoBehaviour:
   _targetRenderer: {fileID: 7381298177982408912}
   _fullness: -1
   _transitionSpeed: 1
+  _maskScale: {fileID: 7517654891412271491}
 --- !u!114 &3651417201645896926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10198,6 +10200,20 @@ MonoBehaviour:
   baseStepFrequency: 4
   referenceSpeed: 3
   _toPlay: 0
+--- !u!114 &7517654891412271491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7639196645248377222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc76ff6b0559f7a4dad676720b8e0386, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetObject: {fileID: 4491447435704929401}
+  lerpDuration: 1
 --- !u!1 &8501868317233603984
 GameObject:
   m_ObjectHideFlags: 0

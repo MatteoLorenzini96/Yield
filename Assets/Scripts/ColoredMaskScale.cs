@@ -23,6 +23,10 @@ public class ColoredMaskScale : MonoBehaviour
     // -------------------------
     // FUNZIONI DI SCALA ASSOLUTE
     // -------------------------
+    public void ScaleTo0()
+    {
+        StartScaleTo(Vector3.one * 0f);
+    }
 
     public void ScaleTo1()
     {

@@ -20,7 +20,7 @@ public class NPCFullnessController : MonoBehaviour
     private float _lastFullness;
     private Coroutine _transitionRoutine;
 
-    // ⬅️ SALVA lo stato di scala già attivato per NON ripetere i lerp
+    // 🔹 Tiene traccia dell'ultimo livello di scala applicato
     private int _lastScaleLevel = -1;
 
     public float CurrentFullness => _fullness;
@@ -37,14 +37,11 @@ public class NPCFullnessController : MonoBehaviour
             return;
         }
 
-        // --- ✔️ FIX: Ottiene automaticamente lo script ColoredMaskScale se non assegnato
         if (!_maskScale)
         {
             _maskScale = GetComponent<ColoredMaskScale>();
             if (!_maskScale)
-            {
                 Debug.LogWarning($"{name}: Nessuno script ColoredMaskScale trovato nell'oggetto.");
-            }
         }
 
         _materialInstance = _targetRenderer.material;
@@ -93,19 +90,32 @@ public class NPCFullnessController : MonoBehaviour
             return;
 
         // ------------------------------------------
-        //     LOGICA DI SCALING A EVENTO UNICO
+        //           ⚡ NUOVA LOGICA DI SCALING
         // ------------------------------------------
 
         int scaleLevel = -1;
 
-        if (_fullness > -1f)
-            scaleLevel = 0; // attiva
-        if (_fullness >= 0f)
-            scaleLevel = 1; // scala a 2
-        if (_fullness >= 1f)
-            scaleLevel = 2; // scala a 3
+        // ⭐ LIVELLO 0 - SOLO quando FULLNESS = -1
+        if (_fullness == -1f)
+            scaleLevel = 0;
 
-        // Se il livello NON è cambiato → NON rifare i lerp
+        // ⭐ LIVELLO 1 - quando FULLNESS > -1
+        if (_fullness > -1f)
+            scaleLevel = 1;
+
+        // ⭐ LIVELLO 2 - FULLNESS >= -0.5
+        if (_fullness >= -0.5f)
+            scaleLevel = 2;
+
+        // ⭐ LIVELLO 3 - FULLNESS >= 0
+        if (_fullness >= 0f)
+            scaleLevel = 3;
+
+        // ⭐ LIVELLO 4 - FULLNESS >= 1
+        if (_fullness >= 1f)
+            scaleLevel = 4;
+
+        // Evita ripetizioni (niente spam di Lerp)
         if (scaleLevel == _lastScaleLevel)
             return;
 
@@ -114,14 +124,22 @@ public class NPCFullnessController : MonoBehaviour
         switch (scaleLevel)
         {
             case 0:
-                _maskScale.ActivateObject();
+                _maskScale.ScaleTo0();     // SOLO per -1
                 break;
 
             case 1:
-                _maskScale.ScaleTo2();
+                _maskScale.ActivateObject();
                 break;
 
             case 2:
+                _maskScale.ScaleTo1();
+                break;
+
+            case 3:
+                _maskScale.ScaleTo2();
+                break;
+
+            case 4:
                 _maskScale.ScaleTo3();
                 break;
         }

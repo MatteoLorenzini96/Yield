@@ -438,6 +438,7 @@ GameObject:
   - component: {fileID: 5616508921295241632}
   - component: {fileID: 7097791461498284511}
   - component: {fileID: 4872263443414702235}
+  - component: {fileID: 1463001960914851363}
   m_Layer: 0
   m_Name: NPCGiver
   m_TagString: NPC
@@ -489,6 +490,9 @@ MonoBehaviour:
   safeDistance: 30
   isGiver: 1
   spawnWanderRadius: 2
+  fullChargeVFX: {fileID: 0}
+  fullVFXObject: {fileID: 0}
+  fullSFXName: 
 --- !u!114 &1565892907162942286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -504,6 +508,7 @@ MonoBehaviour:
   _targetRenderer: {fileID: 8765835298283798311}
   _fullness: -0.8
   _transitionSpeed: 2
+  _maskScale: {fileID: 1463001960914851363}
 --- !u!114 &2922318565243382574
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -591,6 +596,20 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &1463001960914851363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8158051012290658917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc76ff6b0559f7a4dad676720b8e0386, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetObject: {fileID: 7157949434279968755}
+  lerpDuration: 1
 --- !u!1001 &1155912194409830071
 PrefabInstance:
   m_ObjectHideFlags: 0
