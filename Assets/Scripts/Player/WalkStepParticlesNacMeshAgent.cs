@@ -20,7 +20,7 @@ public class WalkStepParticles_NavMeshAgent : MonoBehaviour
     public float referenceSpeed = 3f;
 
     [Header("Need To Play?")]
-    public bool _toPlay = true; // Impostato a true di default
+    public bool _toPlay = false; // Impostato a true di default
 
     private bool leftStepNext = false; // Inizia con piede destro (o sinistro, non importa)
     private float stepTimer = 0f;

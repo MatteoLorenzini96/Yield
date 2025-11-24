@@ -29,7 +29,7 @@ public class NPCControllerProximity : MonoBehaviour
     [SerializeField] private float spawnWanderRadius = 2f;
 
     [Header("VFX & SFX Settings")]
-    [SerializeField] private ParticleSystem fullVFX;
+    [SerializeField] private ParticleSystem fullChargeVFX;
     [SerializeField] private GameObject fullVFXObject;
     [SerializeField] private string fullSFXName;
 
@@ -43,6 +43,7 @@ public class NPCControllerProximity : MonoBehaviour
 
     private NPCFullnessController _npcFullness;
     private FullnessController _playerFullness;
+    private WalkStepParticles_NavMeshAgent _walker;
     private Animator animator;
 
     public event Action OnGiverDestroyed;
@@ -55,29 +56,37 @@ public class NPCControllerProximity : MonoBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _npcFullness = GetComponent<NPCFullnessController>();
+
+        // ✔ Walker preso in automatico
+        if (_walker == null)
+        {
+            _walker = GetComponent<WalkStepParticles_NavMeshAgent>();
+            if (_walker == null)
+                Debug.LogWarning($"{name}: Nessun WalkStepParticles_NavMeshAgent trovato!");
+        }
+
         _spawnPosition = transform.position;
 
-        if (fullVFX != null)
-        {
-            fullVFX.Stop();
-        }
+        if (fullChargeVFX != null)
+            fullChargeVFX.Stop();
 
         animator = GetComponentInChildren<Animator>();
         if (animator == null)
             Debug.LogError($"{name}: Nessun Animator trovato!");
 
+        // Trigger
         if (_detectionTrigger == null)
         {
-            Debug.LogError($"{name}: assegna un SphereCollider per la rilevazione!");
+            Debug.LogError($"{name}: assegna uno SphereCollider per la rilevazione!");
             enabled = false;
             return;
         }
 
         _detectionTrigger.isTrigger = true;
 
+        // Fullness player
         if (_player != null)
             _playerFullness = _player.GetComponent<FullnessController>();
-        
     }
 
     void Start()
@@ -347,8 +356,8 @@ public class NPCControllerProximity : MonoBehaviour
     private void PlayFullVFX()
     {
         // ParticleSystem
-        if (fullVFX != null)
-            fullVFX.Play();
+        if (fullChargeVFX != null)
+            fullChargeVFX.Play();
 
         // GameObject
         if (fullVFXObject != null)
@@ -357,5 +366,8 @@ public class NPCControllerProximity : MonoBehaviour
         // SFX tramite SoundManager
         if (!string.IsNullOrEmpty(fullSFXName) && SoundManager.Instance != null)
             SoundManager.Instance.PlaySFXWithPitch(fullSFXName, transform);
+
+        if (_walker != null)
+            _walker._toPlay = true;
     }
 }
