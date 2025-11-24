@@ -43,6 +43,7 @@ public class NPCControllerProximity : MonoBehaviour
 
     private NPCFullnessController _npcFullness;
     private FullnessController _playerFullness;
+    private ColoredMaskScale _playerColoredMaskScale;
     private WalkStepParticles_NavMeshAgent _walker;
     private Animator animator;
 
@@ -87,6 +88,7 @@ public class NPCControllerProximity : MonoBehaviour
         // Fullness player
         if (_player != null)
             _playerFullness = _player.GetComponent<FullnessController>();
+            _playerColoredMaskScale = _player.GetComponent<ColoredMaskScale>();
     }
 
     void Start()
@@ -319,6 +321,9 @@ public class NPCControllerProximity : MonoBehaviour
             }
 
             _playerFullness.SetFullness(1f);
+            _playerColoredMaskScale.ActivateObject();
+            _playerColoredMaskScale.ScaleTo3();
+
             _npcFullness.SetFullness(-1f);
 
             var speedBoost = _player.GetComponent<PlayerSpeedBoost>();

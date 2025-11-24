@@ -10,14 +10,30 @@ public class WalkStepParticles_Rigidbody : MonoBehaviour
     public Rigidbody playerRigidbody;
 
     [Header("Step Detection")]
-    public float minSpeedThreshold = 0.1f;    // velocit� minima per far partire i passi
-    public float baseStepFrequency = 1.5f;    // frequenza dei passi a velocit� di riferimento
+    public float minSpeedThreshold = 0.1f;
+    public float baseStepFrequency = 1.5f;
 
     [Header("Need To Play?")]
     public bool _toPlay;
 
-    private bool leftStepNext = false;        // inizia con piede destro
+    private bool leftStepNext = false;
     private float stepTimer = 0f;
+
+    // ================================
+    //      FUNZIONI RICHIESTE
+    // ================================
+
+    public void EnableToPlay()
+    {
+        _toPlay = true;
+    }
+
+    public void DisableToPlay()
+    {
+        _toPlay = false;
+    }
+
+    // (Se vuoi posso aggiungere anche una ToggleToPlay())
 
     private void Update()
     {
@@ -25,22 +41,18 @@ public class WalkStepParticles_Rigidbody : MonoBehaviour
         {
             if (playerRigidbody == null) return;
 
-            // Velocit� orizzontale reale
             Vector3 horizontalVelocity = new Vector3(playerRigidbody.linearVelocity.x, 0f, playerRigidbody.linearVelocity.z);
             float currentSpeed = horizontalVelocity.magnitude;
 
-            // Se il player non si muove, reset del timer
             if (currentSpeed < minSpeedThreshold)
             {
                 stepTimer = 0f;
                 return;
             }
 
-            // Frequenza adattiva basata sulla velocit� reale
-            float speedRatio = currentSpeed / 3f; // 3f = riferimento per walk speed base
+            float speedRatio = currentSpeed / 3f;
             float adjustedFrequency = baseStepFrequency * speedRatio;
 
-            // Incrementa timer
             stepTimer += Time.deltaTime * adjustedFrequency;
 
             if (stepTimer >= 1f)
@@ -49,7 +61,6 @@ public class WalkStepParticles_Rigidbody : MonoBehaviour
                 stepTimer = 0f;
             }
         }
-
         else return;
     }
 
@@ -64,6 +75,6 @@ public class WalkStepParticles_Rigidbody : MonoBehaviour
             rightParticle?.Emit(1);
         }
 
-        leftStepNext = !leftStepNext; // alterna i passi
+        leftStepNext = !leftStepNext;
     }
 }

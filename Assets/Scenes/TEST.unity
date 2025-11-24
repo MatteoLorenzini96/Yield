@@ -293,22 +293,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: BasicLevel
       objectReference: {fileID: 0}
-    - target: {fileID: 8870445997838482503, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870445997838482503, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870445997838482503, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870445997838482503, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
-      propertyPath: m_ConstrainProportionsScale
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

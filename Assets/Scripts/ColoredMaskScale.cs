@@ -20,6 +20,12 @@ public class ColoredMaskScale : MonoBehaviour
             targetObject.SetActive(true);
     }
 
+    public void DeactivateObject()
+    {
+        if (targetObject != null)
+            targetObject.SetActive(false);
+    }
+
     // -------------------------
     // FUNZIONI DI SCALA ASSOLUTE
     // -------------------------
