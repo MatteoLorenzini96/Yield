@@ -30,6 +30,11 @@ public class FullnessController : MonoBehaviour
     [SerializeField] private MusicSetting _musicAbove25 = new MusicSetting { clipName = "Main2", volume = 1f };
     [SerializeField] private MusicSetting _musicBelow25 = new MusicSetting { clipName = "Main3", volume = 1f };
 
+    // --- NUOVI CAMPI PER VFX ---
+    [Header("VFX Settings")]
+    [SerializeField] private GameObject _vfxOnFullnessReached; // Il GameObject del VFX
+    [SerializeField] private float _vfxDuration = 3f; // Durata dopo l'attivazione
+
     [Header("Test Settings")]
     [SerializeField] private float _changeAmount = 0.1f;
 
@@ -40,6 +45,9 @@ public class FullnessController : MonoBehaviour
     // Flag per forzare la musica del case 1 la prima volta che entriamo nel case 3
     private bool _forceCase1UntilFull = false;
     private bool _firstCase3Encountered = false;
+
+    // --- NUOVI FLAG DI STATO ---
+    private bool _fullnessOneReachedOnce = false; // Traccia se la fullness ha raggiunto 1
 
     public float CurrentFullness => _fullness;
 
@@ -54,6 +62,12 @@ public class FullnessController : MonoBehaviour
 
         _materialInstance = _targetRenderer.material;
         ApplyFullness();
+
+        // Assicura che il VFX sia disattivato all'inizio
+        if (_vfxOnFullnessReached != null)
+        {
+            _vfxOnFullnessReached.SetActive(false);
+        }
     }
 
     private void Start()
@@ -83,7 +97,34 @@ public class FullnessController : MonoBehaviour
 
         ApplyFullness();
         EvaluateFullnessState();
+
+        // --- NUOVA LOGICA: CONTROLLA SE FULLNESS HA RAGGIUNTO 1 PER LA PRIMA VOLTA ---
+        if (Mathf.Approximately(_fullness, 1f) && !_fullnessOneReachedOnce)
+        {
+            _fullnessOneReachedOnce = true;
+            ActivateVFX();
+        }
     }
+
+    private void ActivateVFX()
+    {
+        if (_vfxOnFullnessReached != null)
+        {
+            _vfxOnFullnessReached.SetActive(true);
+            // Avvia la coroutine per disattivare il VFX dopo un certo tempo
+            StartCoroutine(DeactivateVFXAfterDelay(_vfxDuration));
+        }
+    }
+
+    private System.Collections.IEnumerator DeactivateVFXAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (_vfxOnFullnessReached != null)
+        {
+            _vfxOnFullnessReached.SetActive(false);
+        }
+    }
+    // ---------------------------------------------------------------------------------
 
     private void ApplyFullness()
     {
