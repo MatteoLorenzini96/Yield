@@ -24486,7 +24486,7 @@ MonoBehaviour:
   fullChargeVFX: {fileID: 1002753474134647066}
   giveEnergyVFX: {fileID: 0}
   fullVFXObject: {fileID: 2395338890217785104}
-  fullSFXName: 
+  fullSFXName: Full
 --- !u!114 &5138014375476777795
 MonoBehaviour:
   m_ObjectHideFlags: 0
