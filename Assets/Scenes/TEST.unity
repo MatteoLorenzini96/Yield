@@ -249,6 +249,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 410639423109076489, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: fullSFXName
+      value: Full
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958750317552941054, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: sfxVolume
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958750317552941054, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: sfxClips.Array.data[0].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 08422e96c72e2f64abc47eda3e7d812f, type: 3}
+    - target: {fileID: 2958750317552941054, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: sfxClips.Array.data[0].name
+      value: Full
+      objectReference: {fileID: 0}
     - target: {fileID: 4054529302182801271, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

@@ -394,8 +394,8 @@ public class NPCControllerProximity : MonoBehaviour
             fullVFXObject.SetActive(true);
 
         // SFX tramite SoundManager
-        // if (!string.IsNullOrEmpty(fullSFXName) && SoundManager.Instance != null)
-        //     SoundManager.Instance.PlaySFXWithPitch(fullSFXName, transform);
+        if (!string.IsNullOrEmpty(fullSFXName) && SoundManager.Instance != null)
+            SoundManager.Instance.PlaySFXWithPitch(fullSFXName, transform);
 
         if (_walker != null)
             _walker._toPlay = true;
