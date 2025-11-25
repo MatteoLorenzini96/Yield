@@ -24477,7 +24477,7 @@ MonoBehaviour:
   approachSpeed: 4
   blockSpeed: 3
   runAwaySpeed: 5
-  stopDistance: 2
+  stopDistance: 1.5
   wanderRadius: 2
   wanderDelay: 2.5
   safeDistance: 5

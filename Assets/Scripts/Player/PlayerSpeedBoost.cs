@@ -22,14 +22,16 @@ public class PlayerSpeedBoost : MonoBehaviour
     {
         if (!isBoosted)
             StartCoroutine(BoostRoutine());
-        else
+        /*
+         * else
             Debug.Log("Boost già attivo!");
+        */
     }
 
     private IEnumerator BoostRoutine()
     {
         isBoosted = true;
-        Debug.Log("⚡ Boost attivato! Velocità aumentata.");
+        //Debug.Log("⚡ Boost attivato! Velocità aumentata.");
 
         // Applica il boost usando il modificatore del player
         playerMovement.SpeedBoostModifier = speedMultiplier;
@@ -38,7 +40,7 @@ public class PlayerSpeedBoost : MonoBehaviour
 
         // Ripristina il modificatore
         playerMovement.SpeedBoostModifier = 1f;
-        Debug.Log("🛑 Boost terminato. Velocità ripristinate.");
+        //Debug.Log("🛑 Boost terminato. Velocità ripristinate.");
         isBoosted = false;
     }
 }

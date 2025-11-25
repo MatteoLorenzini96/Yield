@@ -34,9 +34,27 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
             if (_playerFullness == null)
                 Debug.LogError("Player FullnessController non trovato!");
         }
+    }
+
+    private void Start()
+    {
+        // 🔹 LOGICA AGGIUNTA: SOTTOSCRIVI L'EVENTO SE È UN GIVER
+        if (_npcController != null && _npcController.IsGiver)
+        {
+            _npcController.OnGiverDestroyed += HandleGiverDestroyed;
+        }
 
         // 🔹 REGISTRA NPC NEL MANAGER
         NPCManager.Instance?.RegisterNPC(_npcController);
+    }
+
+    private void OnDestroy()
+    {
+        // ⚠️ IMPORTANTE: Annulla la sottoscrizione
+        if (_npcController != null && _npcController.IsGiver)
+        {
+            _npcController.OnGiverDestroyed -= HandleGiverDestroyed;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -72,10 +90,10 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
     {
         if (_npcController.IsGiver)
         {
-            NPCManager.Instance?.UnregisterNPC(_npcController);
+            // La de-registrazione del Giver è stata rimossa da qui e spostata in HandleGiverDestroyed.
             return;
         }
-            
+
         if (_playerFullness == null || _npcFullness == null) return;
 
         // 🔹 SE L'NPC È FULL → SCAPPA
@@ -85,7 +103,7 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
             {
                 NPCManager.Instance?.UnregisterNPC(_npcController);
                 _npcController.RunAway();
-                Debug.Log($"[{name}] NPC è pieno → scappa!");
+                //Debug.Log($"[{name}] NPC è pieno → scappa!");
             }
 
             _currentState = 4;
@@ -112,6 +130,16 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
         HandleBehavior(newState);
     }
 
+    /// <summary>
+    /// Chiamato quando l'evento OnGiverDestroyed viene invocato in NPCControllerProximity.
+    /// Questo rimuove l'NPC dalla lista attiva prima che l'NPC venga distrutto.
+    /// </summary>
+    private void HandleGiverDestroyed()
+    {
+        //Debug.Log($"[{name}]: GiverDestroyed Evento ricevuto. De-registrazione Giver in corso.");
+        NPCManager.Instance?.UnregisterNPC(_npcController);
+    }
+
     private void HandleBehavior(int state)
     {
         switch (state)
@@ -133,6 +161,7 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
 
             case 4:
                 Debug.Log($"{name} sta facendo RunAway");
+                // La de-registrazione per NPC non Giver che scappano resta qui.
                 NPCManager.Instance?.UnregisterNPC(_npcController);
 
                 _npcController.RunAway();

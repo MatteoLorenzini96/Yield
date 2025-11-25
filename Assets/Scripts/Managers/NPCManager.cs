@@ -22,10 +22,19 @@ public class NPCManager : MonoBehaviour
     /// <summary>
     /// Viene chiamato dagli NPC quando si attivano
     /// </summary>
+    // NPCManager.cs
     public void RegisterNPC(NPCControllerProximity npc)
     {
+        //Debug.Log($"Tentativo di registrazione di: {npc.name}. Manager Attivo: {Instance != null}");
         if (!_activeNPCs.Contains(npc))
+        {
             _activeNPCs.Add(npc);
+            //Debug.Log($"REGISTRAZIONE RIUSCITA. Totale NPC attivi: {_activeNPCs.Count}");
+        }
+        else
+        {
+            //Debug.Log($"ATTENZIONE: {npc.name} era già registrato.");
+        }
     }
 
     /// <summary>
@@ -57,6 +66,7 @@ public class NPCManager : MonoBehaviour
     {
         foreach (var npc in _activeNPCs)
             npc.BlockPlayer();
+            //Debug.Log("Attiva Tutti i player che bloccano");
     }
 
     public void MakeAllRunAway()

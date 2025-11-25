@@ -208,9 +208,12 @@ public class FullnessController : MonoBehaviour
                 break;
             case 4:
                 _onFullnessBelow25?.Invoke();
+                if (_firstCase3Encountered)
+                {
+                    NPCManager.Instance.MakeAllBlockPlayer();
+                }
                 sm?.PlayMusic(_musicBelow25.clipName, _musicBelow25.volume);
                 break;
         }
     }
-
 }

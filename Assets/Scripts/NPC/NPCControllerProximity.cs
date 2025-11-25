@@ -219,7 +219,7 @@ public class NPCControllerProximity : MonoBehaviour
     {
         _agent.speed = blockSpeed;
 
-        while (_playerInRange && _player != null)
+        while (_player != null)
         {
             float dist = Vector3.Distance(transform.position, _player.position);
             _agent.isStopped = dist <= stopDistance;
