@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 2544181472216572999}
   - component: {fileID: 7033831647512482971}
   - component: {fileID: 6569516799255887728}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -497,7 +497,7 @@ GameObject:
   - component: {fileID: 5277952075346833334}
   - component: {fileID: 5802722985721067412}
   - component: {fileID: 324304011809460030}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Exterior
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -583,7 +583,7 @@ GameObject:
   - component: {fileID: 7618000333110300808}
   - component: {fileID: 1564973698196060008}
   - component: {fileID: 6830840178446156594}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ColorMask
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -668,7 +668,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7806039079422559313}
   - component: {fileID: 2334900091192288762}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: NPCChecker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -722,7 +722,7 @@ GameObject:
   - component: {fileID: 4251685331831404521}
   - component: {fileID: 5104730753126576499}
   - component: {fileID: 6739428748321195291}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -806,7 +806,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6866659121041933753}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -839,7 +839,7 @@ GameObject:
   - component: {fileID: 4495895951912233996}
   - component: {fileID: 4092829231989305612}
   - component: {fileID: 7529198482541686575}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FootL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5672,7 +5672,7 @@ GameObject:
   - component: {fileID: 4082337531965118391}
   - component: {fileID: 5721682564020849499}
   - component: {fileID: 2964586782345515588}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FootR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10618,6 +10618,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: VFX_EnergyTransfer
       objectReference: {fileID: 0}
+    - target: {fileID: 37174081084215171, guid: b60a277163448454fa525c0e7062ff3c, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 588672468572506084, guid: b60a277163448454fa525c0e7062ff3c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -10748,6 +10752,10 @@ PrefabInstance:
     - target: {fileID: 6830101962358524740, guid: ed84b15b632f06b45978ed64721ae6c6, type: 3}
       propertyPath: m_Name
       value: SM_Chibi_Character
+      objectReference: {fileID: 0}
+    - target: {fileID: 6830101962358524740, guid: ed84b15b632f06b45978ed64721ae6c6, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10897,6 +10905,10 @@ PrefabInstance:
     - target: {fileID: 1789657061586425191, guid: e1d2bd7bfd4815d4489b92df412e0e3b, type: 3}
       propertyPath: m_Name
       value: VFX_MaxFullness
+      objectReference: {fileID: 0}
+    - target: {fileID: 1789657061586425191, guid: e1d2bd7bfd4815d4489b92df412e0e3b, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1789657061586425191, guid: e1d2bd7bfd4815d4489b92df412e0e3b, type: 3}
       propertyPath: m_IsActive

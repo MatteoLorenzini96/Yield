@@ -14894,7 +14894,7 @@ MonoBehaviour:
   stopDistance: 2
   wanderRadius: 2
   wanderDelay: 2.5
-  safeDistance: 30
+  safeDistance: 5
   isGiver: 1
   spawnWanderRadius: 2
   fullChargeVFX: {fileID: 0}
