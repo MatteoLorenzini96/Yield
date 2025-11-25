@@ -54,7 +54,7 @@ public class EnergyTransfer : MonoBehaviour
 
     private void Update()
     {
-        // 🔥 Rotazione continua durante il transfer
+        // 🔥 Rotazione continua durante il transfer del VFX del Player verso l'NPC
         if (_inTransfer && _currentTransferTarget != null)
             RotateVFXTowardsNPC(_currentTransferTarget);
 
@@ -80,6 +80,7 @@ public class EnergyTransfer : MonoBehaviour
         if (_closestNPC.CurrentFullness >= 1f)
             return;
 
+        // Assumi che EnergyTransferManager esista e sia accessibile
         float transferAmount = EnergyTransferManager.Instance.transferAmount;
         float maxTransferable = _playerFullness.CurrentFullness - (-1f);
         if (maxTransferable <= 0f) return;
@@ -131,13 +132,34 @@ public class EnergyTransfer : MonoBehaviour
     private IEnumerator TransferEnergyRoutine(NPCFullnessController npc, float actualTransfer)
     {
         _inTransfer = true;
-
-        // 🔥 Imposta la target da seguire per tutta la durata
         _currentTransferTarget = npc.transform;
 
-        // 🔥 VFX ON
+        // Ottieni il VFX Receiver dell'NPC
+        NPCVFXReceiver npcVFXReceiver = npc.GetComponent<NPCVFXReceiver>();
+
+        // --- INIZIO ATTIVAZIONE VFX ---
+
+        // 🔥 VFX ON sul Player
         if (transferVFX != null)
             transferVFX.Play();
+
+        // 🔥 VFX ON sull'NPC e avvia rotazione
+        if (npcVFXReceiver != null && npcVFXReceiver.incomingVFX != null)
+        {
+            // Attiva entrambi i sistemi
+            npcVFXReceiver.incomingVFX.Play();
+            if (npcVFXReceiver.emissionChildVFX != null)
+            {
+                // Assumendo che emissionChildVFX sia accessibile (o tramite un getter)
+                npcVFXReceiver.emissionChildVFX.Play();
+            }
+            npcVFXReceiver.StartReceivingVFX(); // Avvia la rotazione nell'Update() dell'NPC
+
+            // Imposta il rate iniziale (massimo)
+            npcVFXReceiver.UpdateEmissionRate(_playerFullness.CurrentFullness);
+        }
+
+        // --- FINE ATTIVAZIONE VFX ---
 
         // Retrieve dynamic values from EnergyTransferManager
         float npcMultiplier = EnergyTransferManager.Instance.npcMultiplier;
@@ -151,19 +173,36 @@ public class EnergyTransfer : MonoBehaviour
         float npcTarget = Mathf.Clamp(npcStart + actualTransfer * npcMultiplier, -1f, 1f);
 
         float elapsed = 0f;
+        float currentFullness = playerStart;
 
         while (elapsed < transferDuration)
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / transferDuration);
 
-            _playerFullness.SetFullness(Mathf.Lerp(playerStart, playerTarget, t));
+            // Calcola il nuovo Fullness
+            currentFullness = Mathf.Lerp(playerStart, playerTarget, t);
+
+            // Applica il Fullness
+            _playerFullness.SetFullness(currentFullness);
             npc.SetFullness(Mathf.Lerp(npcStart, npcTarget, t));
 
-            yield return null;  // rotazione gestita da Update()
+            // 🔥 AGGIORNAMENTO DEL RATE OVER TIME SULL'NPC
+            if (npcVFXReceiver != null)
+            {
+                // Passa il valore di Fullness aggiornato per scalare l'emissione del VFX child
+                npcVFXReceiver.UpdateEmissionRate(currentFullness);
+            }
+
+            yield return null;
         }
 
+        // Finalizza lo stato (assicura il valore target esatto)
+        _playerFullness.SetFullness(playerTarget);
+
+        // Calcolo del ritorno (invariato)
         float returnAmount = actualTransfer * npcMultiplier * playerReturnFraction;
+        // Aggiorna il Fullness del player dopo il ritorno
         _playerFullness.SetFullness(Mathf.Clamp(_playerFullness.CurrentFullness + returnAmount, -1f, 1f));
 
         var speedBoost = GetComponent<PlayerSpeedBoost>();
@@ -175,9 +214,28 @@ public class EnergyTransfer : MonoBehaviour
 
         UpdateClosestNPC();
 
-        // 🔥 VFX OFF
+        // --- INIZIO DISATTIVAZIONE VFX ---
+
+        // 🔥 VFX OFF sul Player
         if (transferVFX != null)
             transferVFX.Stop();
+
+        // 🔥 VFX OFF sull'NPC e ferma rotazione
+        if (npcVFXReceiver != null)
+        {
+            // Impostiamo il rate finale (a zero se Fullness è -1)
+            // Usiamo il valore Fullness finale PRIMA del ritorno, che è playerTarget
+            npcVFXReceiver.UpdateEmissionRate(playerTarget);
+
+            npcVFXReceiver.StopReceivingVFX(); // Ferma la rotazione
+
+            // Ferma entrambi i sistemi
+            if (npcVFXReceiver.incomingVFX != null)
+                npcVFXReceiver.incomingVFX.Stop();
+            if (npcVFXReceiver.emissionChildVFX != null)
+                npcVFXReceiver.emissionChildVFX.Stop();
+        }
+        // --- FINE DISATTIVAZIONE VFX ---
     }
 
     private void RotateVFXTowardsNPC(Transform npc)
