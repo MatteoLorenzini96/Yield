@@ -6496,6 +6496,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: d2100f10c342364479e7a527f9ef5429, type: 3}
   m_PrefabInstance: {fileID: 2134739040}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &566064885 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 751124513772491759, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+  m_PrefabInstance: {fileID: 2041210217}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &571688582
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16088,6 +16093,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2100f10c342364479e7a527f9ef5429, type: 3}
+--- !u!4 &1417990466 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5526087694013662157, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+  m_PrefabInstance: {fileID: 2041210217}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1420681151
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17979,6 +17989,11 @@ Transform:
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 2d5fb229ae2945742b900a405a5e7a0b, type: 3}
   m_PrefabInstance: {fileID: 580658068}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1579125746 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5055075405296146094, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+  m_PrefabInstance: {fileID: 2041210217}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1583763751
 PrefabInstance:
@@ -23205,6 +23220,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2712521260598920507, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _cameraPositions.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2712521260598920507, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: '_cameraPositions.Array.data[0]'
+      value: 
+      objectReference: {fileID: 566064885}
+    - target: {fileID: 2712521260598920507, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: '_cameraPositions.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1417990466}
+    - target: {fileID: 2712521260598920507, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: '_cameraPositions.Array.data[2]'
+      value: 
+      objectReference: {fileID: 2041210220}
+    - target: {fileID: 2712521260598920507, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: '_cameraPositions.Array.data[3]'
+      value: 
+      objectReference: {fileID: 2041210219}
+    - target: {fileID: 2712521260598920507, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: '_cameraPositions.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1579125746}
     - target: {fileID: 4054529302182801271, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -23254,6 +23293,16 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+--- !u!4 &2041210219 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2522748314373011155, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+  m_PrefabInstance: {fileID: 2041210217}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2041210220 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6031256707112928695, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+  m_PrefabInstance: {fileID: 2041210217}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2042625279
 PrefabInstance:
   m_ObjectHideFlags: 0
