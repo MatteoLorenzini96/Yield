@@ -30,6 +30,8 @@ public class NPCControllerProximity : MonoBehaviour
 
     [Header("VFX & SFX Settings")]
     [SerializeField] private ParticleSystem fullChargeVFX;
+    // 🔥 NUOVO CAMPO: VFX di trasferimento del Giver
+    [SerializeField] private ParticleSystem giveEnergyVFX;
     [SerializeField] private GameObject fullVFXObject;
     [SerializeField] private string fullSFXName;
 
@@ -48,7 +50,7 @@ public class NPCControllerProximity : MonoBehaviour
     private Animator animator;
 
     public event Action OnGiverDestroyed;
-    public event Action OnFinishedRunAway; // 🔹 Nuovo evento
+    public event Action OnFinishedRunAway;
 
     public bool IsGiver => isGiver;
     public bool HasBeenInteracted => _hasBeenInteracted;
@@ -63,6 +65,7 @@ public class NPCControllerProximity : MonoBehaviour
         {
             _walker = GetComponent<WalkStepParticles_NavMeshAgent>();
             if (_walker == null)
+                if (!isGiver)
                 Debug.LogWarning($"{name}: Nessun WalkStepParticles_NavMeshAgent trovato!");
         }
 
@@ -70,6 +73,10 @@ public class NPCControllerProximity : MonoBehaviour
 
         if (fullChargeVFX != null)
             fullChargeVFX.Stop();
+
+        // 🔥 VFX: Assicura che il VFX di trasferimento sia fermo all'inizio
+        if (giveEnergyVFX != null)
+            giveEnergyVFX.Stop();
 
         animator = GetComponentInChildren<Animator>();
         if (animator == null)
@@ -87,8 +94,10 @@ public class NPCControllerProximity : MonoBehaviour
 
         // Fullness player
         if (_player != null)
+        {
             _playerFullness = _player.GetComponent<FullnessController>();
             _playerColoredMaskScale = _player.GetComponent<ColoredMaskScale>();
+        }
     }
 
     void Start()
@@ -280,6 +289,7 @@ public class NPCControllerProximity : MonoBehaviour
 
     private IEnumerator GiverRoutine()
     {
+        // 1. Avvicinamento
         while (!_playerInRange)
         {
             Vector3 randomDir = UnityEngine.Random.insideUnitSphere * spawnWanderRadius + _spawnPosition;
@@ -303,9 +313,17 @@ public class NPCControllerProximity : MonoBehaviour
             yield return null;
         }
 
-        // Trasferimento fulleness
+        _agent.isStopped = true;
+
+        // 2. Trasferimento Fullness
         if (_playerFullness != null && _npcFullness != null)
         {
+            // 🔥 Avvia il VFX di trasferimento
+            if (giveEnergyVFX != null)
+            {
+                giveEnergyVFX.Play();
+            }
+
             float startPlayer = _playerFullness.CurrentFullness;
             float startNPC = _npcFullness.CurrentFullness;
             float duration = 3f;
@@ -320,6 +338,12 @@ public class NPCControllerProximity : MonoBehaviour
                 yield return null;
             }
 
+            // 🔥 Ferma il VFX di trasferimento
+            if (giveEnergyVFX != null)
+            {
+                giveEnergyVFX.Stop();
+            }
+
             _playerFullness.SetFullness(1f);
             _playerColoredMaskScale.ActivateObject();
             _playerColoredMaskScale.ScaleTo3();
@@ -331,6 +355,7 @@ public class NPCControllerProximity : MonoBehaviour
                 speedBoost.ActivateBoost();
         }
 
+        // 3. Fuga
         yield return RunAwayRoutine();
     }
 
@@ -369,8 +394,8 @@ public class NPCControllerProximity : MonoBehaviour
             fullVFXObject.SetActive(true);
 
         // SFX tramite SoundManager
-        if (!string.IsNullOrEmpty(fullSFXName) && SoundManager.Instance != null)
-            SoundManager.Instance.PlaySFXWithPitch(fullSFXName, transform);
+        // if (!string.IsNullOrEmpty(fullSFXName) && SoundManager.Instance != null)
+        //     SoundManager.Instance.PlaySFXWithPitch(fullSFXName, transform);
 
         if (_walker != null)
             _walker._toPlay = true;
