@@ -17,6 +17,9 @@ public class EnergyTransfer : MonoBehaviour
     [SerializeField] private ParticleSystem transferVFX;
     [SerializeField] private float rotationSpeed = 10f;
 
+    // Aggiunto: Controlla se è possibile avviare un nuovo trasferimento
+    private bool _canTransfer = true;
+
     private FullnessController _playerFullness;
     private readonly List<NPCFullnessController> _npcsInRange = new List<NPCFullnessController>();
     private NPCFullnessController _closestNPC;
@@ -57,7 +60,8 @@ public class EnergyTransfer : MonoBehaviour
         if (_inTransfer && _currentTransferTarget != null)
             RotateVFXTowardsNPC(_currentTransferTarget);
 
-        if (Input.GetMouseButtonDown(0))
+        // MODIFICA: Invoca l'evento solo se il trasferimento è permesso
+        if (Input.GetMouseButtonDown(0) && _canTransfer)
             OnLeftClick?.Invoke();
     }
 
@@ -74,8 +78,10 @@ public class EnergyTransfer : MonoBehaviour
     private void HandleTransferRequest()
     {
         if (!_giverDestroyed) return;
-        if (_inTransfer || _closestNPC == null) return;
+        if (_closestNPC == null) return;
 
+        // La variabile _canTransfer gestisce già il blocco del click se _inTransfer è true.
+        // Se non possiamo trasferire energia, usciamo.
         if (_closestNPC.CurrentFullness >= 1f)
             return;
 
@@ -83,24 +89,20 @@ public class EnergyTransfer : MonoBehaviour
         float transferAmount = EnergyTransferManager.Instance.transferAmount;
 
         // 1. Calcola quanta Fullness il player può *effettivamente* dare
-        // La Fullness minima è -1f, quindi il massimo trasferibile è la Fullness attuale meno il limite minimo.
         // Poiché il limite minimo è -1f, maxTransferable = CurrentFullness - (-1f) = CurrentFullness + 1f.
-        // Ad esempio, se CurrentFullness è 0.5f, può trasferire fino a 1.5f.
-        // Se CurrentFullness è -0.5f, può trasferire fino a 0.5f.
         float maxTransferable = _playerFullness.CurrentFullness - (-1f);
 
-        // 2. LOGICA MODIFICATA: L'unico controllo per bloccare è se non si può trasferire *nulla* (maxTransferable <= 0f)
-        // Se maxTransferable è > 0f, si può ancora trasferire, anche se è inferiore a transferAmount.
+        // 2. LOGICA: Se non si può trasferire *nulla* (maxTransferable <= 0f), si esce.
         if (maxTransferable <= 0f) return;
 
         // 3. Calcola il trasferimento effettivo:
-        // È il minimo tra l'ammontare desiderato (transferAmount) e l'ammontare massimo disponibile (maxTransferable).
-        // Se transferAmount > maxTransferable, si usa maxTransferable per l'ultimo "shot".
         float actualTransfer = Mathf.Min(transferAmount, maxTransferable);
 
         // Se actualTransfer è positivo, inizia la routine
         if (actualTransfer > 0f)
         {
+            // BLOCCO DEL CLICK
+            _canTransfer = false;
             StartCoroutine(TransferEnergyRoutine(_closestNPC, actualTransfer));
         }
     }
@@ -189,6 +191,9 @@ public class EnergyTransfer : MonoBehaviour
         float npcStart = npc.CurrentFullness;
         float npcTarget = Mathf.Clamp(npcStart + actualTransfer * npcMultiplier, -1f, 1f);
 
+        // MODIFICA 2: Arrotonda il target finale dell'NPC a 1 decimale
+        npcTarget = Mathf.Round(npcTarget * 10f) / 10f;
+
         float elapsed = 0f;
         float currentFullness = playerStart;
 
@@ -202,7 +207,10 @@ public class EnergyTransfer : MonoBehaviour
 
             // Applica il Fullness
             _playerFullness.SetFullness(currentFullness);
-            npc.SetFullness(Mathf.Lerp(npcStart, npcTarget, t));
+
+            // Interpolazione verso il target arrotondato
+            float npcCurrentLerp = Mathf.Lerp(npcStart, npcTarget, t);
+            npc.SetFullness(npcCurrentLerp);
 
             // 🔥 AGGIORNAMENTO DEL RATE OVER TIME SULL'NPC
             if (npcVFXReceiver != null)
@@ -216,6 +224,8 @@ public class EnergyTransfer : MonoBehaviour
 
         // Finalizza lo stato (assicura il valore target esatto)
         _playerFullness.SetFullness(playerTarget);
+        // Usa il valore target arrotondato
+        npc.SetFullness(npcTarget);
 
         // Calcolo del ritorno (invariato)
         float returnAmount = actualTransfer * npcMultiplier * playerReturnFraction;
@@ -229,6 +239,9 @@ public class EnergyTransfer : MonoBehaviour
         _inTransfer = false;
         _currentTransferTarget = null;
 
+        // SBLOCCO DEL CLICK
+        _canTransfer = true;
+
         UpdateClosestNPC();
 
         // --- INIZIO DISATTIVAZIONE VFX ---
@@ -240,8 +253,7 @@ public class EnergyTransfer : MonoBehaviour
         // 🔥 VFX OFF sull'NPC e ferma rotazione
         if (npcVFXReceiver != null)
         {
-            // Impostiamo il rate finale (a zero se Fullness è -1)
-            // Usiamo il valore Fullness finale PRIMA del ritorno, che è playerTarget
+            // Impostiamo il rate finale (usando il valore Fullness finale PRIMA del ritorno)
             npcVFXReceiver.UpdateEmissionRate(playerTarget);
 
             npcVFXReceiver.StopReceivingVFX(); // Ferma la rotazione
