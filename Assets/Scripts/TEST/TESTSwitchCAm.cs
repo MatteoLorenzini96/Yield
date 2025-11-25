@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CameraSwitcher : MonoBehaviour
 {
@@ -8,25 +8,50 @@ public class CameraSwitcher : MonoBehaviour
     // Variabile per la telecamera che vuoi muovere
     public Camera mainCamera;
 
+    // Variabile privata per tenere traccia della posizione attuale
+    private int _currentIndex = 0;
+
+    void Start()
+    {
+        // Assicurati che ci siano posizioni e che la telecamera principale sia assegnata
+        if (mainCamera == null)
+        {
+            Debug.LogError($"{name}: Telecamera principale non assegnata!");
+            enabled = false;
+            return;
+        }
+
+        if (cameraPositions.Length == 0)
+        {
+            Debug.LogError($"{name}: Array cameraPositions vuoto!");
+            enabled = false;
+            return;
+        }
+
+        // Imposta subito la telecamera sulla prima posizione all'avvio
+        SwitchCameraPosition(_currentIndex);
+    }
+
     // Update viene chiamato ogni frame
     void Update()
     {
-        // Verifica se il tasto 1 � stato premuto
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            SwitchCameraPosition(0); // Posizione 1
-        }
-
-        // Verifica se il tasto 2 � stato premuto
+        // ➡️ Scorrimento AVANTI (Tasto '2')
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            SwitchCameraPosition(1); // Posizione 2
+            // Incrementa l'indice e usa l'operatore Modulo (%) per tornare a 0
+            // se superiamo la lunghezza dell'array.
+            _currentIndex = (_currentIndex + 1) % cameraPositions.Length;
+            SwitchCameraPosition(_currentIndex);
         }
 
-        // Verifica se il tasto 3 � stato premuto
-        if (Input.GetKeyDown(KeyCode.Alpha3))
+        // ⬅️ Scorrimento INDIETRO (Tasto '1')
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            SwitchCameraPosition(2); // Posizione 3
+            // Decrementa l'indice. 
+            // La formula (+ length) % length gestisce il ritorno all'ultima posizione (length - 1)
+            // se l'indice corrente è 0.
+            _currentIndex = (_currentIndex - 1 + cameraPositions.Length) % cameraPositions.Length;
+            SwitchCameraPosition(_currentIndex);
         }
     }
 
@@ -38,10 +63,12 @@ public class CameraSwitcher : MonoBehaviour
             // Muove la telecamera alla posizione del GameObject indicato nell'array
             mainCamera.transform.position = cameraPositions[index].position;
             mainCamera.transform.rotation = cameraPositions[index].rotation;
+
+            Debug.Log($"Passaggio alla telecamera in posizione: {index + 1}");
         }
         else
         {
-            Debug.LogWarning("Indice di posizione fuori range!");
+            Debug.LogWarning("Indice di posizione fuori range! (Questo non dovrebbe succedere con il codice Update modificato)");
         }
     }
 }
