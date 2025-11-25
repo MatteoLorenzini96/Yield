@@ -77,6 +77,7 @@ public class GameOverController : MonoBehaviour
         if (!_isGameOver && _fullnessController.CurrentFullness <= _gameOverThreshold)
         {
             TriggerGameOver();
+            NPCManager.Instance.MakeAllRunAway();
         }
     }
 
