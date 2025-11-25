@@ -2,7 +2,6 @@
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
-using System;
 
 [RequireComponent(typeof(FullnessController))]
 public class EnergyTransfer : MonoBehaviour
@@ -82,11 +81,28 @@ public class EnergyTransfer : MonoBehaviour
 
         // Assumi che EnergyTransferManager esista e sia accessibile
         float transferAmount = EnergyTransferManager.Instance.transferAmount;
+
+        // 1. Calcola quanta Fullness il player può *effettivamente* dare
+        // La Fullness minima è -1f, quindi il massimo trasferibile è la Fullness attuale meno il limite minimo.
+        // Poiché il limite minimo è -1f, maxTransferable = CurrentFullness - (-1f) = CurrentFullness + 1f.
+        // Ad esempio, se CurrentFullness è 0.5f, può trasferire fino a 1.5f.
+        // Se CurrentFullness è -0.5f, può trasferire fino a 0.5f.
         float maxTransferable = _playerFullness.CurrentFullness - (-1f);
+
+        // 2. LOGICA MODIFICATA: L'unico controllo per bloccare è se non si può trasferire *nulla* (maxTransferable <= 0f)
+        // Se maxTransferable è > 0f, si può ancora trasferire, anche se è inferiore a transferAmount.
         if (maxTransferable <= 0f) return;
 
+        // 3. Calcola il trasferimento effettivo:
+        // È il minimo tra l'ammontare desiderato (transferAmount) e l'ammontare massimo disponibile (maxTransferable).
+        // Se transferAmount > maxTransferable, si usa maxTransferable per l'ultimo "shot".
         float actualTransfer = Mathf.Min(transferAmount, maxTransferable);
-        StartCoroutine(TransferEnergyRoutine(_closestNPC, actualTransfer));
+
+        // Se actualTransfer è positivo, inizia la routine
+        if (actualTransfer > 0f)
+        {
+            StartCoroutine(TransferEnergyRoutine(_closestNPC, actualTransfer));
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -167,6 +183,7 @@ public class EnergyTransfer : MonoBehaviour
         float transferDuration = EnergyTransferManager.Instance.transferDuration;
 
         float playerStart = _playerFullness.CurrentFullness;
+        // Usa actualTransfer come calcolato in HandleTransferRequest
         float playerTarget = Mathf.Clamp(playerStart - actualTransfer, -1f, 1f);
 
         float npcStart = npc.CurrentFullness;

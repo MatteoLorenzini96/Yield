@@ -24,7 +24,7 @@ public class EnergyTransferManager : MonoBehaviour
         Instance = this;
     }
 
-    /*
+   /* 
     private void Update()
     {
         logTimer += Time.deltaTime;

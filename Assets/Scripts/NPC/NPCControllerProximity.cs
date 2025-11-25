@@ -4,10 +4,18 @@ using System;
 using System.Collections;
 
 [RequireComponent(typeof(NavMeshAgent))]
+/// <summary>
+/// Controlla il comportamento di un NPC (Wander, Approach, Block, RunAway)
+/// basato sulla vicinanza al Player e gestisce la logica dei Giver.
+/// </summary>
 public class NPCControllerProximity : MonoBehaviour
 {
+    // === 1. FIELDS (Variabili serializzate) ===
+
     [Header("Target Settings")]
+    [Tooltip("Il Transform del Player. Se non assegnato, cerca l'oggetto con il tag 'Player' in Awake.")]
     [SerializeField] private Transform _player;
+    [Tooltip("SphereCollider utilizzato per rilevare il Player.")]
     [SerializeField] private SphereCollider _detectionTrigger;
 
     [Header("Movement Speeds")]
@@ -30,10 +38,11 @@ public class NPCControllerProximity : MonoBehaviour
 
     [Header("VFX & SFX Settings")]
     [SerializeField] private ParticleSystem fullChargeVFX;
-    // 🔥 NUOVO CAMPO: VFX di trasferimento del Giver
     [SerializeField] private ParticleSystem giveEnergyVFX;
     [SerializeField] private GameObject fullVFXObject;
     [SerializeField] private string fullSFXName;
+
+    // === 2. VARIABILI PRIVATE ===
 
     private Vector3 _spawnPosition;
     private NavMeshAgent _agent;
@@ -47,7 +56,9 @@ public class NPCControllerProximity : MonoBehaviour
     private FullnessController _playerFullness;
     private ColoredMaskScale _playerColoredMaskScale;
     private WalkStepParticles_NavMeshAgent _walker;
-    private Animator animator;
+    private Animator _animator;
+
+    // === 3. EVENTI E PROPRIETÀ PUBBLICHE ===
 
     public event Action OnGiverDestroyed;
     public event Action OnFinishedRunAway;
@@ -55,44 +66,48 @@ public class NPCControllerProximity : MonoBehaviour
     public bool IsGiver => isGiver;
     public bool HasBeenInteracted => _hasBeenInteracted;
 
+    // === 4. UNITY LIFECYCLE METHODS ===
+
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
         _npcFullness = GetComponent<NPCFullnessController>();
 
-        // ✔ Walker preso in automatico
-        if (_walker == null)
-        {
-            _walker = GetComponent<WalkStepParticles_NavMeshAgent>();
-            if (_walker == null)
-                if (!isGiver)
-                Debug.LogWarning($"{name}: Nessun WalkStepParticles_NavMeshAgent trovato!");
-        }
+        // Inizializzazione dei componenti opzionali
+        _walker = GetComponent<WalkStepParticles_NavMeshAgent>();
+        _animator = GetComponentInChildren<Animator>();
+
+        if (_animator == null) Debug.LogError($"{name}: Nessun Animator trovato!");
+        if (_walker == null && !isGiver) Debug.LogWarning($"{name}: Nessun WalkStepParticles_NavMeshAgent trovato!");
 
         _spawnPosition = transform.position;
 
-        if (fullChargeVFX != null)
-            fullChargeVFX.Stop();
+        // Assicurati che i VFX siano fermi all'inizio
+        if (fullChargeVFX != null) fullChargeVFX.Stop();
+        if (giveEnergyVFX != null) giveEnergyVFX.Stop();
 
-        // 🔥 VFX: Assicura che il VFX di trasferimento sia fermo all'inizio
-        if (giveEnergyVFX != null)
-            giveEnergyVFX.Stop();
-
-        animator = GetComponentInChildren<Animator>();
-        if (animator == null)
-            Debug.LogError($"{name}: Nessun Animator trovato!");
-
-        // Trigger
+        // Trigger check e setup
         if (_detectionTrigger == null)
         {
-            Debug.LogError($"{name}: assegna uno SphereCollider per la rilevazione!");
+            Debug.LogError($"{name}: Assegna uno SphereCollider per la rilevazione!");
             enabled = false;
             return;
         }
-
         _detectionTrigger.isTrigger = true;
 
-        // Fullness player
+        // 🎯 LOGICA DI RICERCA DEL PLAYER TRAMITE TAG (Se _player è null)
+        if (_player == null)
+        {
+            GameObject playerObject = GameObject.FindWithTag("Player");
+
+            if (playerObject != null)
+            {
+                _player = playerObject.transform;
+                //Debug.LogWarning($"{name}: Player assegnato automaticamente tramite Tag 'Player'.");
+            }
+        }
+
+        // Inizializzazione dei componenti del Player
         if (_player != null)
         {
             _playerFullness = _player.GetComponent<FullnessController>();
@@ -100,13 +115,24 @@ public class NPCControllerProximity : MonoBehaviour
         }
     }
 
-    void Start()
+    private void Start()
     {
-        if (isGiver)
+        if (isGiver && _player != null)
         {
+            // Abbonamento all'EnergyTransfer del Player se è un Giver
             var et = _player.GetComponent<EnergyTransfer>();
-            et.SubscribeToGiver(this);
+            if (et != null)
+            {
+                et.SubscribeToGiver(this);
+            }
         }
+
+        // 🎯 NUOVA LOGICA: Avvia il Wander all'inizio, se non è un Giver
+        if (!isGiver)
+        {
+            WanderSlow();
+        }
+
         UpdateAnimator();
     }
 
@@ -135,6 +161,8 @@ public class NPCControllerProximity : MonoBehaviour
         UpdateAnimator();
     }
 
+    // === 5. INPUT & TRIGGER HANDLERS ===
+
     private void OnPlayerInteraction()
     {
         _hasBeenInteracted = true;
@@ -143,17 +171,21 @@ public class NPCControllerProximity : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (_player == null) return;
-        if (other.transform == _player) _playerInRange = true;
 
-        if (isGiver && other.transform == _player)
+        if (other.transform == _player)
         {
-            RestartRoutine(GiverRoutine());
+            _playerInRange = true;
+            if (isGiver)
+            {
+                RestartRoutine(GiverRoutine());
+            }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (_player == null) return;
+
         if (other.transform == _player)
         {
             _playerInRange = false;
@@ -162,6 +194,8 @@ public class NPCControllerProximity : MonoBehaviour
                 StopMovement();
         }
     }
+
+    // === 6. COROUTINE MANAGEMENT ===
 
     public void StopMovement()
     {
@@ -172,22 +206,37 @@ public class NPCControllerProximity : MonoBehaviour
         _agent.isStopped = true;
     }
 
-    // ───────────── Coroutine principali ─────────────
     public void WanderSlow() => RestartRoutine(WanderRoutine());
     public void ApproachPlayer() => RestartRoutine(ApproachRoutine());
     public void BlockPlayer() => RestartRoutine(BlockRoutine());
     public void RunAway() => RestartRoutine(RunAwayRoutine());
 
+    private void RestartRoutine(IEnumerator routine)
+    {
+        if (_activeRoutine != null)
+            StopCoroutine(_activeRoutine);
+
+        _activeRoutine = StartCoroutine(routine);
+    }
+
+    // === 7. COROUTINE LOGIC ===
+
     private IEnumerator WanderRoutine()
     {
-        while (_playerInRange || isGiver)
-        {
-            Vector3 randomDir = UnityEngine.Random.insideUnitSphere * wanderRadius + transform.position;
+        _agent.speed = wanderSpeed;
 
-            if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, wanderRadius, NavMesh.AllAreas))
+        // Condizione:
+        // - Se è un Giver: continua sempre a vagare.
+        // - Se NON è un Giver: continua a vagare finché il Player non è nel range (_playerInRange == false).
+        while (isGiver || !_playerInRange)
+        {
+            // Calcola una posizione casuale nell'area di spawn (ora usa _spawnPosition come centro)
+            Vector3 randomPoint = UnityEngine.Random.insideUnitSphere * wanderRadius;
+            randomPoint += _spawnPosition; // Aggiusta per vagare attorno al punto di spawn
+
+            if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, wanderRadius, NavMesh.AllAreas))
             {
                 _agent.isStopped = false;
-                _agent.speed = wanderSpeed;
                 _agent.SetDestination(hit.position);
             }
 
@@ -263,47 +312,31 @@ public class NPCControllerProximity : MonoBehaviour
             }
             else
             {
-                // Se l’NPC è Giver → distruggi
                 if (isGiver)
                 {
+                    // Logica di distruzione/completamento per Giver
                     _agent.isStopped = true;
                     _isRunningAway = false;
                     OnFinishedRunAway?.Invoke();
                     OnGiverDestroyed?.Invoke();
                     Destroy(gameObject);
+                    break;
                 }
                 else
                 {
-                    // Non Giver → rimani in RunAway ma fermo
+                    // Non Giver: rimane in RunAway ma fermo, aspettando che il Player si avvicini di nuovo
                     _agent.isStopped = true;
                     OnFinishedRunAway?.Invoke();
-                    // rimane _isRunningAway = true, continuerà a controllare il player
                 }
             }
 
             yield return null;
         }
-
-        _agent.isStopped = true;
     }
 
     private IEnumerator GiverRoutine()
     {
         // 1. Avvicinamento
-        while (!_playerInRange)
-        {
-            Vector3 randomDir = UnityEngine.Random.insideUnitSphere * spawnWanderRadius + _spawnPosition;
-
-            if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, spawnWanderRadius, NavMesh.AllAreas))
-            {
-                _agent.isStopped = false;
-                _agent.speed = wanderSpeed;
-                _agent.SetDestination(hit.position);
-            }
-
-            yield return new WaitForSeconds(wanderDelay);
-        }
-
         _agent.speed = approachSpeed;
 
         while (Vector3.Distance(transform.position, _player.position) > stopDistance)
@@ -318,11 +351,7 @@ public class NPCControllerProximity : MonoBehaviour
         // 2. Trasferimento Fullness
         if (_playerFullness != null && _npcFullness != null)
         {
-            // 🔥 Avvia il VFX di trasferimento
-            if (giveEnergyVFX != null)
-            {
-                giveEnergyVFX.Play();
-            }
+            if (giveEnergyVFX != null) giveEnergyVFX.Play();
 
             float startPlayer = _playerFullness.CurrentFullness;
             float startNPC = _npcFullness.CurrentFullness;
@@ -333,21 +362,20 @@ public class NPCControllerProximity : MonoBehaviour
             {
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
+
+                // Interpolazione simultanea di Player e NPC Fullness
                 _playerFullness.SetFullness(Mathf.Lerp(startPlayer, 1f, t));
                 _npcFullness.SetFullness(Mathf.Lerp(startNPC, -1f, t));
                 yield return null;
             }
 
-            // 🔥 Ferma il VFX di trasferimento
-            if (giveEnergyVFX != null)
-            {
-                giveEnergyVFX.Stop();
-            }
+            if (giveEnergyVFX != null) giveEnergyVFX.Stop();
 
             _playerFullness.SetFullness(1f);
-            _playerColoredMaskScale.ActivateObject();
-            _playerColoredMaskScale.ScaleTo3();
 
+            // Attivazione dei bonus Player
+            _playerColoredMaskScale?.ActivateObject();
+            _playerColoredMaskScale?.ScaleTo3();
             _npcFullness.SetFullness(-1f);
 
             var speedBoost = _player.GetComponent<PlayerSpeedBoost>();
@@ -355,45 +383,37 @@ public class NPCControllerProximity : MonoBehaviour
                 speedBoost.ActivateBoost();
         }
 
-        // 3. Fuga
+        // 3. Fuga (attende la fine della RunAwayRoutine)
         yield return RunAwayRoutine();
     }
 
-    private void RestartRoutine(IEnumerator routine)
-    {
-        if (_activeRoutine != null)
-            StopCoroutine(_activeRoutine);
-
-        _activeRoutine = StartCoroutine(routine);
-    }
+    // === 8. UTILITY METHODS ===
 
     private void UpdateAnimator()
     {
-        if (animator == null || _agent == null) return;
+        if (_animator == null || _agent == null) return;
 
+        // Calcola la velocità orizzontale
         Vector3 horizontalVel = new Vector3(_agent.velocity.x, 0f, _agent.velocity.z);
         float speed = horizontalVel.magnitude;
-        animator.SetFloat("Speed", speed);
+        _animator.SetFloat("Speed", speed);
 
         if (!isGiver && _npcFullness != null)
         {
             float fullness = _npcFullness.CurrentFullness;
             bool isAlmostEmpty = fullness < -0.52f;
-            animator.SetBool("IsAlmostEmpty", isAlmostEmpty);
+            _animator.SetBool("IsAlmostEmpty", isAlmostEmpty);
         }
     }
 
     private void PlayFullVFX()
     {
-        // ParticleSystem
-        if (fullChargeVFX != null)
-            fullChargeVFX.Play();
+        // VFX
+        if (fullChargeVFX != null) fullChargeVFX.Play();
+        if (fullVFXObject != null) fullVFXObject.SetActive(true);
 
-        // GameObject
-        if (fullVFXObject != null)
-            fullVFXObject.SetActive(true);
-
-        // SFX tramite SoundManager
+        // SFX (Assumendo l'esistenza di SoundManager.Instance)
+        // Nota: SoundManager.Instance deve essere gestito come Singleton in un altro script.
         if (!string.IsNullOrEmpty(fullSFXName) && SoundManager.Instance != null)
             SoundManager.Instance.PlaySFXWithPitch(fullSFXName, transform);
 

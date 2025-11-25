@@ -145,22 +145,22 @@ public class NPCBehaviorByPlayerProximity : MonoBehaviour
         switch (state)
         {
             case 1:
-                Debug.Log($"{name} sta facendo WanderSlow");
+                //Debug.Log($"{name} sta facendo WanderSlow");
                 _npcController.WanderSlow();
                 break;
 
             case 2:
-                Debug.Log($"{name} sta facendo ApproachPlayer");
+                //Debug.Log($"{name} sta facendo ApproachPlayer");
                 _npcController.ApproachPlayer();
                 break;
 
             case 3:
-                Debug.Log($"{name} sta facendo BlockPlayer");
+                //Debug.Log($"{name} sta facendo BlockPlayer");
                 _npcController.BlockPlayer();
                 break;
 
             case 4:
-                Debug.Log($"{name} sta facendo RunAway");
+                //Debug.Log($"{name} sta facendo RunAway");
                 // La de-registrazione per NPC non Giver che scappano resta qui.
                 NPCManager.Instance?.UnregisterNPC(_npcController);
 

@@ -16,7 +16,8 @@ public class CameraSwitcher : MonoBehaviour
         {
             if (_instance == null)
             {
-                _instance = FindFirstObjectByType<CameraSwitcher>();
+                // Usa FindAnyObjectByType per la compatibilità con le versioni moderne di Unity
+                _instance = FindAnyObjectByType<CameraSwitcher>();
                 if (_instance == null)
                 {
                     Debug.LogError($"Errore: Non c'è nessun GameObject con il componente {nameof(CameraSwitcher)} in scena.");
@@ -33,7 +34,7 @@ public class CameraSwitcher : MonoBehaviour
     [SerializeField] private Transform[] _cameraPositions;
 
     [Tooltip("Muri o zone da attivare/disattivare in base alla telecamera. La lunghezza dovrebbe essere uguale o minore a quella di Camera Positions.")]
-    [SerializeField] private GameObject[] _invisibleWalls; // 🧱 NUOVO ARRAY
+    [SerializeField] private GameObject[] _invisibleWalls;
 
     [Tooltip("La telecamera principale che verrà mossa.")]
     [SerializeField] private Camera _mainCamera;
@@ -59,7 +60,7 @@ public class CameraSwitcher : MonoBehaviour
 
     private void Start()
     {
-        // ... (Controlli di validità)
+        // Controlli di validità
         if (_mainCamera == null)
         {
             Debug.LogError($"{nameof(CameraSwitcher)}: Telecamera principale non assegnata!");
@@ -79,7 +80,7 @@ public class CameraSwitcher : MonoBehaviour
         _mainCamera.transform.rotation = _cameraPositions[_currentIndex].rotation;
 
         // Attiva i muri iniziali
-        ToggleWalls(_currentIndex); // 🧱 CHIAMATA INIZIALE
+        ToggleWalls(_currentIndex);
     }
 
     private void Update()
@@ -99,14 +100,21 @@ public class CameraSwitcher : MonoBehaviour
 
     // === 4. PUBLIC API METHODS ===
 
+    /// <summary>
+    /// Passa alla posizione della telecamera successiva in un ciclo.
+    /// </summary>
     public void NextCamera()
     {
         _currentIndex = (_currentIndex + 1) % _cameraPositions.Length;
         StartTransition(_currentIndex);
     }
 
+    /// <summary>
+    /// Passa alla posizione della telecamera precedente in un ciclo.
+    /// </summary>
     public void PrevCamera()
     {
+        // La formula (A - B) % N non è sufficiente per numeri negativi, quindi: (A - B + N) % N
         _currentIndex = (_currentIndex - 1 + _cameraPositions.Length) % _cameraPositions.Length;
         StartTransition(_currentIndex);
     }
@@ -115,6 +123,7 @@ public class CameraSwitcher : MonoBehaviour
 
     private void StartTransition(int targetIndex)
     {
+        // Se una transizione è già in corso, la interrompiamo
         if (_transitionCoroutine != null)
         {
             StopCoroutine(_transitionCoroutine);
@@ -125,7 +134,7 @@ public class CameraSwitcher : MonoBehaviour
         // Avviamo la Coroutine di transizione
         _transitionCoroutine = StartCoroutine(SmoothMove(_mainCamera.transform, targetTransform.position, targetTransform.rotation));
 
-        // 🧱 CHIAMATA AL TOGGLE
+        // Attiviamo/Disattiviamo i muri
         ToggleWalls(targetIndex);
 
         //Debug.Log($"Inizio transizione verso la posizione: {targetIndex + 1}");
@@ -133,32 +142,34 @@ public class CameraSwitcher : MonoBehaviour
 
     /// <summary>
     /// Attiva un muro invisibile specifico basato sull'indice della telecamera e disattiva gli altri.
-    /// L'ultima posizione della telecamera disattiva tutti i muri.
+    /// L'ultima posizione della telecamera (indice N-1) disattiva tutti i muri.
+    /// Le posizioni della telecamera da 0 a N-2 attivano il muro corrispondente (se esiste).
     /// </summary>
     private void ToggleWalls(int wallIndex)
     {
+        // Se non ci sono muri, usciamo subito.
         if (_invisibleWalls == null || _invisibleWalls.Length == 0) return;
 
-        // Se l'indice corrisponde all'ULTIMA telecamera, disattiva tutti i muri.
+        // Caso speciale: Se l'indice della telecamera corrisponde all'ULTIMA telecamera, disattiva tutti i muri.
         if (wallIndex == _cameraPositions.Length - 1)
         {
             //Debug.Log("Ultima telecamera selezionata: disattivo tutti i muri.");
             foreach (GameObject wall in _invisibleWalls)
             {
-                if (wall != null) wall.SetActive(false);
+                if (wall != null && wall.activeSelf) wall.SetActive(false);
             }
             return;
         }
 
-        // Altrimenti, attiva il muro corrispondente e disattiva tutti gli altri.
+        // Caso normale: Attiva il muro corrispondente e disattiva tutti gli altri.
+        // Questo ciclo viene eseguito SOLO se wallIndex è 0, 1, ..., _cameraPositions.Length - 2.
         for (int i = 0; i < _invisibleWalls.Length; i++)
         {
             GameObject currentWall = _invisibleWalls[i];
             if (currentWall == null) continue;
 
-            // Il muro deve essere attivo se il suo indice corrisponde all'indice della telecamera, 
-            // e solo se l'indice non supera il numero di muri disponibili.
-            bool shouldBeActive = (i == wallIndex && i < _invisibleWalls.Length - 1); // -1 perché l'ultimo indice delle camere è gestito sopra.
+            // Il muro deve essere attivo SOLO se il suo indice (i) è esattamente uguale all'indice della telecamera (wallIndex).
+            bool shouldBeActive = (i == wallIndex);
 
             if (currentWall.activeSelf != shouldBeActive)
             {
@@ -169,7 +180,7 @@ public class CameraSwitcher : MonoBehaviour
     }
 
     /// <summary>
-    /// Coroutine che sposta e ruota il Transform di partenza al Transform di destinazione.
+    /// Coroutine che sposta e ruota il Transform di partenza al Transform di destinazione usando Lerp/Slerp.
     /// </summary>
     private IEnumerator SmoothMove(Transform startTransform, Vector3 endPosition, Quaternion endRotation)
     {
@@ -180,6 +191,9 @@ public class CameraSwitcher : MonoBehaviour
         while (elapsedTime < _transitionDuration)
         {
             float t = elapsedTime / _transitionDuration;
+
+            // Applica una curva Ease-In-Out per un movimento più gradevole (opzionale)
+            // float tSmooth = t * t * (3f - 2f * t); 
 
             // Interpolazione (Lerp) di posizione e rotazione
             startTransform.position = Vector3.Lerp(startPosition, endPosition, t);
