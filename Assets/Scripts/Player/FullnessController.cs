@@ -211,6 +211,7 @@ public class FullnessController : MonoBehaviour
                 if (_firstCase3Encountered)
                 {
                     NPCManager.Instance.MakeAllBlockPlayer();
+                    CameraSwitcher.Instance.NextCamera();
                 }
                 sm?.PlayMusic(_musicBelow25.clipName, _musicBelow25.volume);
                 break;

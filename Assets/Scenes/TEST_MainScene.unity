@@ -7188,6 +7188,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: dac1a631b172e66469fb09e9987bcf57, type: 3}
   m_PrefabInstance: {fileID: 548095491}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &549434505 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2712521260598920507, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+  m_PrefabInstance: {fileID: 2041210217}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b47409df92d0dc74e8d6fd5900cf1303, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &556128871
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26167,9 +26178,21 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[6].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: _onFullness100to75.m_PersistentCalls.m_Calls.Array.data[4].m_Target
       value: 
       objectReference: {fileID: 1874175467}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[6].m_Target
+      value: 
+      objectReference: {fileID: 549434505}
     - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: _onFullness49to25.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: SetTransferAmount
@@ -26211,6 +26234,10 @@ PrefabInstance:
       value: ScaleTo2
       objectReference: {fileID: 0}
     - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[6].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: _onFullness100to75.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: SetTransferAmount
       objectReference: {fileID: 0}
@@ -26249,6 +26276,10 @@ PrefabInstance:
     - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[4].m_MethodName
       value: ScaleTo0
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[6].m_MethodName
+      value: NextCamera
       objectReference: {fileID: 0}
     - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: _onFullness49to25.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -26315,6 +26346,10 @@ PrefabInstance:
       value: EnergyTransferManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[6].m_TargetAssemblyTypeName
+      value: CameraSwitcher, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: _onFullness49to25.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_FloatArgument
       value: 0.05
       objectReference: {fileID: 0}
@@ -26325,6 +26360,30 @@ PrefabInstance:
     - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: _onFullness100to75.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_FloatArgument
       value: 0.16
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[6].m_Arguments.m_FloatArgument
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 758860751112131581, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _onFullnessBelow25.m_PersistentCalls.m_Calls.Array.data[6].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2727003254327395915, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: _checkDelay
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2727003254327395915, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: 'CameraAdvanceThresholds.Array.data[0]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2727003254327395915, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: 'CameraAdvanceThresholds.Array.data[1]'
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2727003254327395915, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
+      propertyPath: 'CameraAdvanceThresholds.Array.data[2]'
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 2949320602686009880, guid: ff796de1582f8474a857fa1df67a291c, type: 3}
       propertyPath: m_IsActive
