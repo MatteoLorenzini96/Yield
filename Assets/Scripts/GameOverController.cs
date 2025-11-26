@@ -118,6 +118,6 @@ public class GameOverController : MonoBehaviour
     {
         //Debug.Log("GAME OVER! Attivazione Canvas.");
         _gameOverCanvas.SetActive(true);
-        Time.timeScale = 0f;
+        //Time.timeScale = 0f;
     }
 }
