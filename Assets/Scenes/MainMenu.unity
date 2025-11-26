@@ -317,7 +317,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5501068421112329151, guid: 37b8dea8b8776334188dffe857763f95, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -9.04
+      value: 10.17
       objectReference: {fileID: 0}
     - target: {fileID: 5501068421112329151, guid: 37b8dea8b8776334188dffe857763f95, type: 3}
       propertyPath: m_LocalPosition.y
@@ -325,7 +325,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5501068421112329151, guid: 37b8dea8b8776334188dffe857763f95, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.57
+      value: 2.47
       objectReference: {fileID: 0}
     - target: {fileID: 5501068421112329151, guid: 37b8dea8b8776334188dffe857763f95, type: 3}
       propertyPath: m_LocalRotation.w
@@ -402,7 +402,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Press Left Click
+  m_text: Press Left Click to interact
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
   m_sharedMaterial: {fileID: 2140474, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
@@ -1198,7 +1198,7 @@ Transform:
   m_GameObject: {fileID: 1928673534}
   serializedVersion: 2
   m_LocalRotation: {x: 0.17364816, y: 0, z: 0, w: 0.9848078}
-  m_LocalPosition: {x: 1, y: 3, z: -3}
+  m_LocalPosition: {x: 1, y: 4.02, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
