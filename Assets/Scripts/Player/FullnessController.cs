@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
+using System.Collections; // Necessario per IEnumerator
 
 [System.Serializable]
 public class MusicSetting
@@ -48,6 +49,12 @@ public class FullnessController : MonoBehaviour
 
     // --- NUOVI FLAG DI STATO ---
     private bool _fullnessOneReachedOnce = false; // Traccia se la fullness ha raggiunto 1
+
+    // --- NUOVI FLAG PER LA MUSICA (Stato di riproduzione singola) ---
+    private bool _musicState1Played = false;
+    private bool _musicState2Played = false;
+    private bool _musicState3Played = false;
+    private bool _musicState4Played = false;
 
     public float CurrentFullness => _fullness;
 
@@ -102,6 +109,10 @@ public class FullnessController : MonoBehaviour
         if (Mathf.Approximately(_fullness, 1f) && !_fullnessOneReachedOnce)
         {
             _fullnessOneReachedOnce = true;
+
+            // **Aggiungi qui il Reset dei flag musica al raggiungimento di 1 la prima volta**
+            ResetMusicPlayedFlags();
+
             ActivateVFX();
         }
     }
@@ -116,7 +127,7 @@ public class FullnessController : MonoBehaviour
         }
     }
 
-    private System.Collections.IEnumerator DeactivateVFXAfterDelay(float delay)
+    private IEnumerator DeactivateVFXAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
         if (_vfxOnFullnessReached != null)
@@ -124,7 +135,15 @@ public class FullnessController : MonoBehaviour
             _vfxOnFullnessReached.SetActive(false);
         }
     }
-    // ---------------------------------------------------------------------------------
+
+    // --- NUOVA FUNZIONE PER RESETTARE I FLAG DI STATO MUSICA ---
+    private void ResetMusicPlayedFlags()
+    {
+        _musicState1Played = false;
+        _musicState2Played = false;
+        _musicState3Played = false;
+        _musicState4Played = false;
+    }
 
     private void ApplyFullness()
     {
@@ -132,11 +151,43 @@ public class FullnessController : MonoBehaviour
             _materialInstance.SetFloat(_fullnessProperty, _fullness);
     }
 
+    // --- NUOVA FUNZIONE PER RIPRODURRE LA MUSICA DELLO STATO ---
+    private void PlayMusicForState(int state, SoundManager sm)
+    {
+        switch (state)
+        {
+            case 1:
+                sm?.PlayMusic(_musicAbove75.clipName, _musicAbove75.volume);
+                sm.musicSourceA.pitch = 1f;
+                sm.musicSourceB.pitch = 1f;
+                _musicState1Played = true;
+                break;
+            case 2:
+                sm?.PlayMusic(_musicAbove50.clipName, _musicAbove50.volume);
+                sm.musicSourceA.pitch = 0.8f;
+                sm.musicSourceB.pitch = 0.8f;
+                _musicState2Played = true;
+                break;
+            case 3:
+                sm?.PlayMusic(_musicAbove25.clipName, _musicAbove25.volume);
+                sm.musicSourceA.pitch = 1f;
+                sm.musicSourceB.pitch = 1f;
+                _musicState3Played = true;
+                break;
+            case 4:
+                sm?.PlayMusic(_musicBelow25.clipName, _musicBelow25.volume);
+                sm.musicSourceA.pitch = 1f;
+                sm.musicSourceB.pitch = 1f;
+                _musicState4Played = true;
+                break;
+        }
+    }
+
     private void EvaluateFullnessState()
     {
         var sm = SoundManager.Instance;
 
-        // Calcola lo stato corrente
+        // Calcola lo stato corrente (1: >= 75%, 2: >= 50%, 3: >= 25%, 4: < 25%)
         float percent = Mathf.InverseLerp(-1f, 1f, _fullness) * 100f;
         int newState = percent switch
         {
@@ -146,14 +197,15 @@ public class FullnessController : MonoBehaviour
             _ => 4
         };
 
-        // Gestione speciale: prima volta che si entra nel case 3
+        // Gestione speciale: prima volta che si entra nel case 3 (forza musica 1)
         if (newState == 3 && !_firstCase3Encountered)
         {
             _firstCase3Encountered = true;
             _forceCase1UntilFull = true;
             _currentState = 1; // forza case 1
             _onFullness100to75?.Invoke();
-            sm?.PlayMusic(_musicAbove75.clipName, _musicAbove75.volume);
+            // La riproduzione musica qui DEVE essere eseguita per la logica di forzatura iniziale
+            PlayMusicForState(1, sm);
             return;
         }
 
@@ -170,50 +222,76 @@ public class FullnessController : MonoBehaviour
                 {
                     _currentState = 1;
                     _onFullness100to75?.Invoke();
-                    sm?.PlayMusic(_musicAbove75.clipName, _musicAbove75.volume);
+                    // La riproduzione musica qui DEVE essere eseguita per la logica di forzatura iniziale
+                    PlayMusicForState(1, sm);
                 }
                 return;
             }
         }
 
-        // Se il nuovo stato è uguale al corrente, non fare nulla
-        if (newState == _currentState) return;
+        // --- NUOVA LOGICA DI RIPRODUZIONE MUSICA SINGOLA ---
+        // Se la pienezza ha raggiunto 1 e lo stato non è cambiato, NON uscire ANCORA.
+        // Devi eseguire gli eventi UnityEvent anche se la musica non cambia.
+        if (_fullnessOneReachedOnce && newState == _currentState)
+        {
+            // Non fare nulla se siamo nello stesso stato DOPO aver raggiunto 1
+            return;
+        }
+
+        // Se lo stato è lo stesso E NON siamo nella modalità di riproduzione singola (ovvero, prima che _fullness raggiunga 1)
+        if (newState == _currentState && !_fullnessOneReachedOnce)
+        {
+            // La logica precedente bloccava tutto, manteniamo questo comportamento prima di aver raggiunto 1.
+            return;
+        }
 
         _currentState = newState;
 
-        if (sm != null)
-        {
-            sm.musicSourceA.pitch = 1f;
-            sm.musicSourceB.pitch = 1f;
-        }
-
+        // Esegui gli eventi Unity e, se necessario, la musica.
         switch (newState)
         {
             case 1:
                 _onFullness100to75?.Invoke();
-                sm?.PlayMusic(_musicAbove75.clipName, _musicAbove75.volume);
+                if (!_fullnessOneReachedOnce || !_musicState1Played)
+                {
+                    PlayMusicForState(1, sm);
+                }
                 break;
             case 2:
                 _onFullness74to50?.Invoke();
-                if (sm != null)
+                if (!_fullnessOneReachedOnce || !_musicState2Played)
                 {
-                    sm.PlayMusic(_musicAbove50.clipName, _musicAbove50.volume);
-                    sm.musicSourceA.pitch = 0.8f;
-                    sm.musicSourceB.pitch = 0.8f;
+                    PlayMusicForState(2, sm);
                 }
                 break;
             case 3:
                 _onFullness49to25?.Invoke();
-                sm?.PlayMusic(_musicAbove25.clipName, _musicAbove25.volume);
+                if (!_fullnessOneReachedOnce || !_musicState3Played)
+                {
+                    PlayMusicForState(3, sm);
+                }
                 break;
             case 4:
                 _onFullnessBelow25?.Invoke();
-                if (_firstCase3Encountered)
+                if (!_fullnessOneReachedOnce || !_musicState4Played)
                 {
-                    NPCManager.Instance.MakeAllBlockPlayer();
-                    CameraSwitcher.Instance.NextCamera();
+                    if (_firstCase3Encountered)
+                    {
+                        NPCManager.Instance.MakeAllBlockPlayer();
+                        CameraSwitcher.Instance.NextCamera();
+                    }
+                    PlayMusicForState(4, sm);
                 }
-                sm?.PlayMusic(_musicBelow25.clipName, _musicBelow25.volume);
+                else if (_fullnessOneReachedOnce && _musicState4Played)
+                {
+                    // L'unica eccezione dove la logica speciale DEVE essere eseguita sempre
+                    // è lo stato 4 una volta raggiunto (per il blocco NPC e cambio telecamera)
+                    if (_firstCase3Encountered)
+                    {
+                        NPCManager.Instance.MakeAllBlockPlayer();
+                        CameraSwitcher.Instance.NextCamera();
+                    }
+                }
                 break;
         }
     }
