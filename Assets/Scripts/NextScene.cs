@@ -38,7 +38,7 @@ public class NextScene : MonoBehaviour
         {
             // 💡 Abbonamento all'evento OnGiverDestroyed
             _giverController.OnGiverDestroyed += OnGiverDestroyedHandler;
-            Debug.Log($"NextScene: Abbonato all'evento OnGiverDestroyed di {_giverController.name}.");
+            //Debug.Log($"NextScene: Abbonato all'evento OnGiverDestroyed di {_giverController.name}.");
         }
         else
         {
@@ -71,7 +71,7 @@ public class NextScene : MonoBehaviour
     private void OnGiverDestroyedHandler()
     {
         _giverDestroyed = true;
-        Debug.Log("NextScene: Evento OnGiverDestroyed ricevuto. Attivazione oggetto.");
+        //Debug.Log("NextScene: Evento OnGiverDestroyed ricevuto. Attivazione oggetto.");
 
         // 1. Attiva l'oggetto specificato
         if (_objectToActivate != null)

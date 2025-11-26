@@ -34,7 +34,7 @@ public class NPCControllerProximity : MonoBehaviour
 
     [Header("Giver Settings")]
     [SerializeField] private bool isGiver = false;
-    [SerializeField] private float spawnWanderRadius = 2f;
+    //[SerializeField] private float spawnWanderRadius = 2f;
 
     [Header("VFX & SFX Settings")]
     [SerializeField] private ParticleSystem fullChargeVFX;
