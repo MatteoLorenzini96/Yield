@@ -26,6 +26,11 @@ public class GameOverController : MonoBehaviour
     [Tooltip("La soglia di fullness per attivare il Game Over (vicino a -1).")]
     [SerializeField] private float _gameOverThreshold = -0.99f;
 
+    // ⭐ NUOVA VARIABILE ⭐
+    [Header("Game Over Timing")]
+    [Tooltip("Il tempo in secondi da attendere dopo il Game Over prima di iniziare il fade.")]
+    [SerializeField] private float _preFadeDelay = 1.0f;
+
     [Header("State")]
     private Material _materialInstance;
     private bool _isGameOver = false;
@@ -49,8 +54,7 @@ public class GameOverController : MonoBehaviour
             return;
         }
 
-        // ⭐ SOLO QUI STAI TARGETTANDO MAT_Player_Glass (Elemento 0) ⭐
-        // Ottiene un'istanza del materiale all'indice specificato (0)
+        // Ottiene un'istanza del materiale all'indice specificato
         _materialInstance = _targetRenderer.materials[_materialIndex];
 
         // Cerca l'ID della proprietà per prestazioni
@@ -77,7 +81,17 @@ public class GameOverController : MonoBehaviour
         if (!_isGameOver && _fullnessController.CurrentFullness <= _gameOverThreshold)
         {
             TriggerGameOver();
-            NPCManager.Instance.MakeAllRunAway();
+            // Assicurati che NPCManager.Instance non sia null prima di chiamare il metodo
+            if (NPCManager.Instance != null)
+            {
+                NPCManager.Instance.MakeAllRunAway();
+            }
+        }
+
+        // ⭐ NUOVO CONTROLLO: Uscita con ESC ⭐
+        if (_isGameOver && Input.GetKeyDown(KeyCode.Escape))
+        {
+            Quit();
         }
     }
 
@@ -85,7 +99,21 @@ public class GameOverController : MonoBehaviour
     {
         _isGameOver = true;
         _fullnessController.enabled = false;
-        StartCoroutine(FadeMaterialColorIntensity());
+        // ⭐ AVVIA LA NUOVA COROUTINE CON IL RITARDO ⭐
+        StartCoroutine(GameOverSequence());
+    }
+
+    // ⭐ NUOVA COROUTINE: Gestisce il ritardo prima del fade ⭐
+    private IEnumerator GameOverSequence()
+    {
+        // Attende il tempo pre-fade
+        yield return new WaitForSeconds(_preFadeDelay);
+
+        // Avvia la dissolvenza del materiale
+        yield return StartCoroutine(FadeMaterialColorIntensity());
+
+        // Attiva il Canvas del Game Over
+        ActivateGameOverCanvas();
     }
 
     private IEnumerator FadeMaterialColorIntensity()
@@ -96,12 +124,13 @@ public class GameOverController : MonoBehaviour
         while (elapsedTime < _fadeDuration)
         {
             float t = elapsedTime / _fadeDuration;
+            // Usa SmoothStep per un'interpolazione più fluida
             t = Mathf.SmoothStep(0f, 1f, t);
 
             // Interpolazione: dal colore iniziale al nero (zero intensità)
             Color lerpedColor = Color.Lerp(_initialFresnelColor, targetColor, t);
 
-            // Applica la modifica solo a MAT_Player_Glass
+            // Applica la modifica
             _materialInstance.SetColor(_fresnelColorID, lerpedColor);
 
             elapsedTime += Time.deltaTime;
@@ -110,14 +139,28 @@ public class GameOverController : MonoBehaviour
 
         // Assicura che il colore sia esattamente nero (zero intensità) alla fine
         _materialInstance.SetColor(_fresnelColorID, targetColor);
-
-        ActivateGameOverCanvas();
     }
 
     private void ActivateGameOverCanvas()
     {
-        //Debug.Log("GAME OVER! Attivazione Canvas.");
         _gameOverCanvas.SetActive(true);
-        //Time.timeScale = 0f;
+        MouseCursorManager.Instance.ShowCursor();
+        //Time.timeScale = 0f; // Scommenta se vuoi fermare il gioco completamente
+    }
+
+    // ⭐ NUOVA FUNZIONE PUBBLICA per l'uscita ⭐
+    /// <summary>
+    /// Esce dall'applicazione (o dalla modalità Play nell'editor).
+    /// </summary>
+    public void Quit()
+    {
+        //Debug.Log("QUIT: Uscita dall'applicazione richiesta.");
+#if UNITY_EDITOR
+        // Interrompe la modalità Play nell'editor
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+            // Esce dall'applicazione standalone
+            Application.Quit();
+#endif
     }
 }

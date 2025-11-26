@@ -54,6 +54,6 @@ public class MouseCursorManager : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        Debug.Log($"[{nameof(MouseCursorManager)}] Cursore mostrato. Stato: {nameof(CursorLockMode.None)}.");
+        //Debug.Log($"[{nameof(MouseCursorManager)}] Cursore mostrato. Stato: {nameof(CursorLockMode.None)}.");
     }
 }
